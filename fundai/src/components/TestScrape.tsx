@@ -69,11 +69,19 @@ const App: React.FC = () => {
       ) : (
         <>
           {selectedItem ? (
-            <div className='border-2 m-2 py-2 px-4 border-black rounded-md'>
-              <h2>{selectedItem.metadata.title[0]}</h2>
-              {Object.entries(selectedItem.metadata).map(([key, value]) => (
-                <p key={key}><strong>{key}:</strong> {value[0]}</p>
-              ))}
+            <div className='flex flex-col items-start border-2 m-2 py-2 px-4 border-black rounded-md'>
+              <h2 className="text-xl mb-4">{selectedItem.metadata.title[0]}</h2>
+              {Object.entries(selectedItem.metadata).map(([key, value]) => {
+                if (key !== 'keywords' && key !== 'title') {
+                  return (
+                    <div key={key}>
+                      <p><strong>{key}:</strong></p>
+                      <p className="pl-4">{value[0]}</p>
+                    </div>
+                  );
+                }
+                return null;  // Return null if the key is 'keywords'
+              })}
               <button className='border-2 py-2 px-4 border-black rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={handleCloseClick}>Close</button>
             </div>
 
