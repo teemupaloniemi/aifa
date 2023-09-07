@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ScrapeRoutes_1 = __importDefault(require("./routes/ScrapeRoutes"));
 const FundingRoutes_1 = __importDefault(require("./routes/FundingRoutes"));
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
@@ -16,7 +15,6 @@ const corsOptions = {
 };
 app.use((0, cors_1.default)(corsOptions));
 app.use(express_1.default.json());
-app.use("/api", ScrapeRoutes_1.default);
 app.use('/api/fundingTenders', FundingRoutes_1.default);
 app.get('/', (req, res) => {
     res.send('Server is running');
