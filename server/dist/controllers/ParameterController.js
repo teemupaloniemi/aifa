@@ -26,18 +26,26 @@ const params = async (req, res) => {
         });
         console.log("Opening a new page...");
         const page = await browser.newPage();
-        console.log(`Navigating to URL: ${url}...`);
+        console.log(`Navigating to URL: ${url}`);
         await page.goto(url);
         console.log("Waiting for the main content to load...");
-        await page.waitForSelector('#main-content'); // Wait for the element with id="main-content" to appear in the DOM
-        console.log("Scraping content after the specified class...");
-        const scrapedContent = await page.$$eval('body .ux-panel-content.ux-panel-content--fixed-height + *', elements => elements.map(el => el.outerHTML).join('\n'));
-        console.log(`Snippet of scraped content: ${scrapedContent.slice(0, 500)}...`); // Displaying the first 500 characters as a snippet
+        await page.waitForSelector('.addListStyling p');
         console.log("Fetching paragraphs...");
-        const paragraphs = await page.$$eval('p', elements => elements.map(item => item.textContent));
+        // Fetch only the paragraphs inside the scrapedContent
+        const content = await page.$$eval('.addListStyling', elements => {
+            return elements.map(el => {
+                var _a;
+                const spanText = ((_a = el.querySelector('.topicdescriptionkind')) === null || _a === void 0 ? void 0 : _a.textContent) || '';
+                const pTexts = Array.from(el.querySelectorAll('p')).map(p => p.textContent).join(' ');
+                return `${spanText}: ${pTexts}`;
+            });
+        });
         console.log("Closing the browser...");
         await browser.close();
-        let textContent = paragraphs.join(' ');
+        let textContent = content.join(' ');
+        const lines = textContent.split('\n'); // Split the content by lines
+        const filteredLines = lines.filter(line => !line.startsWith('@')); // Filter out lines with '@'
+        textContent = filteredLines.join('\n'); // Join the filtered lines back into a single string
         console.log(`Combined content length: ${textContent.length}`);
         console.log(`Snippet of content: ${textContent}`); // Displaying the first 100 characters as a snippet
         contentPrompt = textContent.length > 30000 ? textContent.slice(0, 30000) : textContent;
@@ -70,27 +78,32 @@ const params = async (req, res) => {
 If some information is not specified leave it blank. By covering these key points, you should have a comprehensive summary of the research fund.
 
 ` + contentPrompt.replace(/\s+/g, ' ').trim();
-    let summaryResult = "";
-    try {
-        console.log('\x1b[32m%s\x1b[0m', "\nOpening GPT connection");
-        const chatCompletion = await openai.chat.completions.create({
-            messages: [{ role: "user", content: combinedPrompt }],
-            model: "gpt-3.5-turbo-16k",
-        });
-        if (chatCompletion) {
-            console.log('\x1b[32m%s\x1b[0m', "\nResponse received");
-            summaryResult = chatCompletion.choices[0].message.content;
+    let summaryResult = contentPrompt;
+    /*try {
+        if (contentPrompt.replace(/\s+/g, ' ').trim().length > 0) {
+            console.log('\x1b[32m%s\x1b[0m', "\nOpening GPT connection");
+
+            const chatCompletion = await openai.chat.completions.create({
+                messages: [{ role: "user", content: combinedPrompt }],
+                model: "gpt-3.5-turbo-16k",
+            });
+
+            if (chatCompletion) {
+                console.log('\x1b[32m%s\x1b[0m', "\nResponse received");
+                summaryResult = chatCompletion.choices[0].message.content as string;
+            }
+        } else {
+            console.log("no content found");
         }
-    }
-    catch (error) {
+    } catch (error: any) {
         if (error.response) {
             console.error(error.response.status, error.response.data);
-        }
-        else {
+        } else {
             console.error(`Error with OpenAI API request: ${error.message}`);
         }
-    }
+    }*/
     console.log('\x1b[32m%s\x1b[0m', "\nReturning to caller");
+    //if (summaryResult.length === 0) return res.send("No content found under that link");
     return res.send(summaryResult); // Sending response
 };
 exports.params = params;

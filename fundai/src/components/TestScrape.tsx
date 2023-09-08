@@ -62,11 +62,16 @@ const App: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<DetailedData | null>(null);
   const [selectedFramework, setSelectedFramework] = useState<string>("");
   const [apiResult, setApiResult] = useState<String>("");
+  const [summarizing, setSummarizing] = useState<boolean>(false);
+  
 
   const handleApiCall = async (url: string) => {
     try {
+      setSummarizing(true);
+      setApiResult("");
       const response = await axios.post("http://localhost:5000/api/fundingTenders/summarize", { url: url });
       setApiResult(response.data);
+      setSummarizing(false);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -89,11 +94,22 @@ const App: React.FC = () => {
   };
 
 
-  function formatText(text: string): string {
-    // Split the text using a regex pattern to identify numbered points
-    const splitText = text.split(/\s(?=\d+\.)/);
-    // Join the split text with line breaks to format it
-    return splitText.join('\n');
+  function formatText(text: string): JSX.Element[] {
+    // Split the text using a regex pattern to identify titles followed by a colon
+    const splitText = text.split(/(?=[A-Z][a-z]+:)/);
+    
+    return splitText.map((section, index) => {
+        // Split each section into title and content
+        const [title, ...contentArr] = section.split(':');
+        const content = contentArr.join(':'); // Join back any colons that might be in the content
+
+        return (
+            <div key={index} className="mb-4">
+                <strong className="block mb-2">{title}:</strong>
+                <p className="pl-4">{content.trim()}</p>
+            </div>
+        );
+    });
   }
 
   const fetchTenders = async () => {
@@ -148,7 +164,8 @@ const App: React.FC = () => {
                         <p><strong>Link + {key}:</strong></p>
                         <p><a href={url} className="pl-4 md:hover:underline text-primary-500">{url}</a></p>
                         <button className='border-2 my-4 py-2 px-4 border-black rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={async () => await handleApiCall(url)}>Summarize</button>
-                        {apiResult && <p className="pl-4">{contentText}</p>}  {/* Display the result below the anchor element */}
+                        {summarizing && <div className='rounded-md border-2 border-black p-4 mb-4'>summarizing...</div> }
+                        {apiResult && formatText(apiResult as string)}
                       </div>
                     );
                   }
