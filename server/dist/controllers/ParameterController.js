@@ -36,8 +36,42 @@ const params = async (req, res) => {
             return elements.map(el => {
                 var _a;
                 const spanText = ((_a = el.querySelector('.topicdescriptionkind')) === null || _a === void 0 ? void 0 : _a.textContent) || '';
-                const pTexts = Array.from(el.querySelectorAll('p')).map(p => p.textContent).join(' ');
-                return `${spanText}: ${pTexts}`;
+                // Extract paragraphs
+                const pTexts = Array.from(el.querySelectorAll('p')).map(p => p.textContent).join('\n');
+                // Extract lists and convert them to coherent strings
+                const listTexts = Array.from(el.querySelectorAll('ul')).map(ul => {
+                    return Array.from(ul.querySelectorAll('li')).map(li => {
+                        var _a;
+                        return `• ${(_a = li.textContent) === null || _a === void 0 ? void 0 : _a.trim()}`;
+                    }).join('\n');
+                }).join('\n\n'); // Separate lists with two newlines
+                // Extract tables and convert them to coherent strings
+                const tableTexts = Array.from(el.querySelectorAll('table')).map(table => {
+                    const headerRows = Array.from(table.querySelectorAll('thead tr')).map(row => {
+                        const cells = Array.from(row.querySelectorAll('td, th')).map(cell => {
+                            var _a;
+                            // Extract text from <p> elements inside the cell, if they exist
+                            const pTexts = Array.from(cell.querySelectorAll('p')).map(p => { var _a; return (_a = p.textContent) === null || _a === void 0 ? void 0 : _a.trim(); });
+                            // If there are <p> elements, join their texts, otherwise use the cell's text content
+                            return pTexts.length > 0 ? pTexts.join(' ') : (_a = cell.textContent) === null || _a === void 0 ? void 0 : _a.trim();
+                        }).join(' - ');
+                        return cells;
+                    }).join('\n');
+                    const bodyRows = Array.from(table.querySelectorAll('tbody tr')).map(row => {
+                        const cells = Array.from(row.querySelectorAll('td, th')).map(cell => {
+                            var _a;
+                            // Extract text from <p> elements inside the cell, if they exist
+                            const pTexts = Array.from(cell.querySelectorAll('p')).map(p => { var _a; return (_a = p.textContent) === null || _a === void 0 ? void 0 : _a.trim(); });
+                            // If there are <p> elements, join their texts, otherwise use the cell's text content
+                            return pTexts.length > 0 ? pTexts.join(' ') : (_a = cell.textContent) === null || _a === void 0 ? void 0 : _a.trim();
+                        }).join(' - ');
+                        return cells;
+                    }).join('\n');
+                    return `${headerRows}\n${bodyRows}`;
+                }).join('\n\n'); // Separate tables with two newlines
+                // Combine title, paragraph texts, list texts, and table texts
+                const combinedText = `${spanText}:\n${pTexts}\n${listTexts}\n${tableTexts}`;
+                return combinedText;
             });
         });
         console.log("Closing the browser...");
@@ -46,64 +80,15 @@ const params = async (req, res) => {
         const lines = textContent.split('\n'); // Split the content by lines
         const filteredLines = lines.filter(line => !line.startsWith('@')); // Filter out lines with '@'
         textContent = filteredLines.join('\n'); // Join the filtered lines back into a single string
+        contentPrompt = textContent;
         console.log(`Combined content length: ${textContent.length}`);
-        console.log(`Snippet of content: ${textContent}`); // Displaying the first 100 characters as a snippet
-        contentPrompt = textContent.length > 30000 ? textContent.slice(0, 30000) : textContent;
     }
     catch (error) {
         console.log("Error:", error.message);
         return res.status(500).send("Error occurred"); // Sending response
     }
-    const combinedPrompt = `I want to analyze this research fund. Can you give me a structured list of key points like, budget, focus areas, organization type, and others that are relevant and summarize that fund. For example things like this
-1. Name of the fund: 
-2. Organization type: (government agency, non-profit organization, private foundation, etc.)
-3. Budget: Total funding available for research projects.
-4. Funding duration: (annual, multi-year, etc.)
-5. Focus areas: Specific research areas the fund supports.
-6. Research priorities: Key issues or topics the fund aims to address.
-7. Eligibility criteria: Who can apply for funding (individual researchers, institutions, etc.)
-8. Funding mechanisms: (grants, scholarships, fellowships, contracts, etc.)
-9. Review process: How proposals are evaluated and awarded.
-10. Funding restrictions: Any limitations on the usage of funds (e.g., human cloning, military research, etc.)
-11. Reporting requirements: Obligations for project reporting and dissemination of research outcomes.
-12. Collaboration opportunities: Encouragement or requirements for partnerships or collaborations.
-13. Awarded projects: Examples of previous projects funded by the research fund.
-14. Research impact: Any notable achievements or impact resulting from the funded projects.
-15. Success indicators: Metrics used to measure the success or impact of past projects.
-16. Geographic scope: Any restrictions or preferences for research based on location.
-17. Sustainability or renewal options: Potential for the fund to continue or renew funding in subsequent years.
-18. Application deadlines: Dates and frequency of proposal submissions.
-19. Contact information: How to reach out to the fund for more information or support.
-
-If some information is not specified leave it blank. By covering these key points, you should have a comprehensive summary of the research fund.
-
-` + contentPrompt.replace(/\s+/g, ' ').trim();
-    let summaryResult = contentPrompt;
-    /*try {
-        if (contentPrompt.replace(/\s+/g, ' ').trim().length > 0) {
-            console.log('\x1b[32m%s\x1b[0m', "\nOpening GPT connection");
-
-            const chatCompletion = await openai.chat.completions.create({
-                messages: [{ role: "user", content: combinedPrompt }],
-                model: "gpt-3.5-turbo-16k",
-            });
-
-            if (chatCompletion) {
-                console.log('\x1b[32m%s\x1b[0m', "\nResponse received");
-                summaryResult = chatCompletion.choices[0].message.content as string;
-            }
-        } else {
-            console.log("no content found");
-        }
-    } catch (error: any) {
-        if (error.response) {
-            console.error(error.response.status, error.response.data);
-        } else {
-            console.error(`Error with OpenAI API request: ${error.message}`);
-        }
-    }*/
+    console.log(`Snippet of content: ${contentPrompt}`); // Displaying the first 100 characters as a snippet
     console.log('\x1b[32m%s\x1b[0m', "\nReturning to caller");
-    //if (summaryResult.length === 0) return res.send("No content found under that link");
-    return res.send(summaryResult); // Sending response
+    return res.send(contentPrompt);
 };
 exports.params = params;

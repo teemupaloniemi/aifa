@@ -158,7 +158,6 @@ const App: React.FC = () => {
                 if (key !== 'keywords' && key !== 'title') {
                   if (key === 'identifier') {
                     const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${value[0].toLowerCase()}`;
-                    const contentText = formatText(apiResult as string)
                     return (
                       <div key={key}>
                         <p><strong>Link + {key}:</strong></p>
