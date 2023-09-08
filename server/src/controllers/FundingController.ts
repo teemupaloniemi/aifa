@@ -7,9 +7,9 @@ class FundingController {
     const framework = req.query.framework as string;
     try {
       console.log('searchTenders: Preparing query data');
-      
+
       const formData = new FormData();
-      
+
       formData.append('query', Buffer.from(JSON.stringify({
         "bool": {
           "must": [
@@ -20,12 +20,12 @@ class FundingController {
           ]
         }
       }), 'utf-8'), { contentType: 'application/json' });
-      
+
       formData.append('languages', Buffer.from(JSON.stringify(["en"]), 'utf-8'), { contentType: 'application/json' });
       formData.append('sort', Buffer.from(JSON.stringify({ "field": "sortStatus", "order": "DESC" }), 'utf-8'), { contentType: 'application/json' });
 
       console.log('searchTenders: Sending request to API');
-      
+
       const response = await axios.post(
         'https://api.tech.ec.europa.eu/search-api/prod/rest/search?apiKey=SEDIA&text=***&pageSize=50&pageNumber=1',
         formData,

@@ -61,6 +61,16 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<DetailedData | null>(null);
   const [selectedFramework, setSelectedFramework] = useState<string>("");
+  const [apiResult, setApiResult] = useState<String>("");
+
+  const handleApiCall = async (url: string) => {
+    try {
+      const response = await axios.post("http://localhost:5000/api/fundingTenders/summarize", { url: url });
+      setApiResult(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
 
   const handleItemClick = (item: TenderData) => {
     // Here, you can fetch the detailed data for the clicked item if needed
@@ -75,8 +85,16 @@ const App: React.FC = () => {
 
   const handleCloseClick = () => {
     setSelectedItem(null);
+    setApiResult("");
   };
 
+
+  function formatText(text: string): string {
+    // Split the text using a regex pattern to identify numbered points
+    const splitText = text.split(/\s(?=\d+\.)/);
+    // Join the split text with line breaks to format it
+    return splitText.join('\n');
+  }
 
   const fetchTenders = async () => {
     setIsLoading(true);
@@ -122,6 +140,18 @@ const App: React.FC = () => {
               <h2 className="text-xl mb-4">{selectedItem.metadata.title[0]}</h2>
               {Object.entries(selectedItem.metadata).map(([key, value]) => {
                 if (key !== 'keywords' && key !== 'title') {
+                  if (key === 'identifier') {
+                    const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${value[0].toLowerCase()}`;
+                    const contentText = formatText(apiResult as string)
+                    return (
+                      <div key={key}>
+                        <p><strong>Link + {key}:</strong></p>
+                        <p><a href={url} className="pl-4 md:hover:underline text-primary-500">{url}</a></p>
+                        <button className='border-2 my-4 py-2 px-4 border-black rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={async () => await handleApiCall(url)}>Summarize</button>
+                        {apiResult && <p className="pl-4">{contentText}</p>}  {/* Display the result below the anchor element */}
+                      </div>
+                    );
+                  }
                   return (
                     <div key={key}>
                       <p><strong>{key}:</strong></p>
@@ -131,7 +161,6 @@ const App: React.FC = () => {
                 }
                 return null;  // Return null if the key is 'keywords'
               })}
-              
             </div>
 
           ) : (

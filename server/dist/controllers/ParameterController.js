@@ -6,11 +6,46 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.params = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 const openai_1 = require("openai");
+const puppeteer_1 = __importDefault(require("puppeteer"));
 dotenv_1.default.config();
 const openai = new openai_1.OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
-const params = async (content) => {
+const params = async (req, res) => {
+    const url = req.body.url || req.query.url; // Assuming URL comes from request body or query
+    if (!url) {
+        return "No url provided!";
+    }
+    let contentPrompt = "";
+    try {
+        console.log("Launching the browser...");
+        const browser = await puppeteer_1.default.launch({
+            executablePath: puppeteer_1.default.executablePath(),
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        });
+        console.log("Opening a new page...");
+        const page = await browser.newPage();
+        console.log(`Navigating to URL: ${url}...`);
+        await page.goto(url);
+        console.log("Waiting for the main content to load...");
+        await page.waitForSelector('#main-content'); // Wait for the element with id="main-content" to appear in the DOM
+        console.log("Scraping content after the specified class...");
+        const scrapedContent = await page.$$eval('body .ux-panel-content.ux-panel-content--fixed-height + *', elements => elements.map(el => el.outerHTML).join('\n'));
+        console.log(`Snippet of scraped content: ${scrapedContent.slice(0, 500)}...`); // Displaying the first 500 characters as a snippet
+        console.log("Fetching paragraphs...");
+        const paragraphs = await page.$$eval('p', elements => elements.map(item => item.textContent));
+        console.log("Closing the browser...");
+        await browser.close();
+        let textContent = paragraphs.join(' ');
+        console.log(`Combined content length: ${textContent.length}`);
+        console.log(`Snippet of content: ${textContent}`); // Displaying the first 100 characters as a snippet
+        contentPrompt = textContent.length > 30000 ? textContent.slice(0, 30000) : textContent;
+    }
+    catch (error) {
+        console.log("Error:", error.message);
+        return res.status(500).send("Error occurred"); // Sending response
+    }
     const combinedPrompt = `I want to analyze this research fund. Can you give me a structured list of key points like, budget, focus areas, organization type, and others that are relevant and summarize that fund. For example things like this
 1. Name of the fund: 
 2. Organization type: (government agency, non-profit organization, private foundation, etc.)
@@ -34,8 +69,7 @@ const params = async (content) => {
 
 If some information is not specified leave it blank. By covering these key points, you should have a comprehensive summary of the research fund.
 
-` + content.replace(/\s+/g, ' ').trim();
-    ;
+` + contentPrompt.replace(/\s+/g, ' ').trim();
     let summaryResult = "";
     try {
         console.log('\x1b[32m%s\x1b[0m', "\nOpening GPT connection");
@@ -57,6 +91,6 @@ If some information is not specified leave it blank. By covering these key point
         }
     }
     console.log('\x1b[32m%s\x1b[0m', "\nReturning to caller");
-    return summaryResult;
+    return res.send(summaryResult); // Sending response
 };
 exports.params = params;
