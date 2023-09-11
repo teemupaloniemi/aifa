@@ -22,6 +22,39 @@ With the increasing complexity and variety of R&D funding instruments available,
 3. Run the application and input your specific criteria.
 4. Receive tailored recommendations on the best-fitting R&D funding instruments.
 
+## How to Run the Program
+
+### Prerequisites
+- Make sure you have Node.js installed on your computer.
+
+### Steps
+
+1. **Clone the Repository**
+
+```git clone <repo_url>```
+
+
+2. **Install Dependencies**
+- Navigate to the `fundai` folder and run:
+  ```npm install```
+- Navigate to the `server` folder and run:
+  ```npm install```
+
+3. **Build the Project**
+- In the `fundai` folder, run:
+  ```npm run build```
+- In the `server` folder, run:
+  ```npm run build```
+
+4. **Start the Application**
+- In the `fundai` folder, run:
+  ```npm start```
+- In the `server` folder, run:
+  ```npm start```
+
+After following these steps, the client should be running on port 3000 and the server should be running on port 5000.
+
+
 ## Contribution
 
 If you're interested in contributing to this research project, please contact the `LICENSE.md` email.
