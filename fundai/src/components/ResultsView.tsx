@@ -7,6 +7,7 @@ interface TenderData {
   title: string;
   language: string;
   content: string;
+  score: number;
 }
 
 interface Metadata {
@@ -29,6 +30,7 @@ interface Metadata {
 interface DetailedData {
   metadata: Metadata;
   scrapedContent: string;
+  score: number;
 }
 
 interface AppProps {
@@ -58,7 +60,8 @@ const frameworks = [
   { id: "43252433", name: "Programme for the Protection of the Euro against Counterfeiting (PERICLES IV)" },
   { id: "43253967", name: "Renewable Energy Financing Mechanism (RENEWFM)" },
   { id: "43254037", name: "European Solidarity Corps (ESC)" },
-  { id: "43392145", name: "European Maritime, Fisheries and Aquaculture Fund (EMFAF)" }
+  { id: "43392145", name: "European Maritime, Fisheries and Aquaculture Fund (EMFAF)" },
+  { id: "43254019", name: "European Social Fund + (ESF)" }
 ];
 
 
@@ -67,21 +70,6 @@ const App: React.FC<AppProps> = ({ inputString }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<DetailedData | null>(null);
   const [selectedFramework, setSelectedFramework] = useState<string>("");
-  const [apiResult, setApiResult] = useState<String>("");
-  const [summarizing, setSummarizing] = useState<boolean>(false);
-
-
-  const handleApiCall = async (url: string) => {
-    try {
-      setSummarizing(true);
-      setApiResult("");
-      const response = await axios.post("http://localhost:5000/api/fundingTenders/summarize", { url: url });
-      setApiResult(response.data);
-      setSummarizing(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  }
 
   const handleItemClick = (item: TenderData) => {
     // Here, you can fetch the detailed data for the clicked item if needed
@@ -96,7 +84,6 @@ const App: React.FC<AppProps> = ({ inputString }) => {
 
   const handleCloseClick = () => {
     setSelectedItem(null);
-    setApiResult("");
   };
 
 
@@ -121,7 +108,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
   const fetchTenders = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:5000/api/fundingTenders/searchTenders?framework=${selectedFramework}`);
+      const response = await axios.post(`http://localhost:5000/api/fundingTenders/searchTenders?framework=${selectedFramework}`, { researchIdea: inputString });
       setTenderData(response.data.results);
     } catch (error) {
       console.error('Error fetching tenders:', error);
@@ -139,34 +126,36 @@ const App: React.FC<AppProps> = ({ inputString }) => {
       </div>
       {/* Dropdown for selecting a framework */}
       <div className="mb-4">
-      <div className="mb-4">
-        <label htmlFor="inputString" className="block text-sm font-medium text-gray-700">Input String</label>
-        <input
-          type="text"
-          id="inputString"
-          name="inputString"
-          value={inputString}
-          readOnly
-          className="mt-1 block w-60 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-        />
-      </div>
-        <select
-          id="frameworkSelect"
-          name="framework"
-          value={selectedFramework}
-          onChange={handleFrameworkChange}
-          className="mt-1 block w-60 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-        >
-          <option value="">Select a framework</option>
-          {frameworks.map(framework => (
-            <option key={framework.id} value={framework.id}>
-              {framework.name}
-            </option>
-          ))}
-        </select>
+        <div className="mb-4">
+          <label htmlFor="inputString" className="block text-sm font-medium text-gray-700">Your Research Idea</label>
+          <textarea
+            id="inputString"
+            name="inputString"
+            value={inputString}
+            readOnly
+            className="w-full h-40 p-4 border-2 border-black rounded-md"
+          />
+        </div>
+        <div className="flex">
+        <button className='border-2 py-2 px-4 border-black rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={fetchTenders}>Fetch Funding Opportunities</button>
+          <select
+            id="frameworkSelect"
+            name="framework"
+            value={selectedFramework}
+            onChange={handleFrameworkChange}
+            className="my-1 mx-4 block w-60 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          >
+            <option value="">Select a framework</option>
+            {frameworks.map(framework => (
+              <option key={framework.id} value={framework.id}>
+                {framework.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      <button className='border-2 py-2 px-4 border-black rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={fetchTenders}>Fetch Funding Opportunities</button>
+
 
       {isLoading ? (
         <p>Loading...</p>
@@ -176,6 +165,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
             <div className='flex flex-col items-start border-2 m-2 py-2 px-4 border-black rounded-md'>
               <button className='border-2 my-4 py-2 px-4 border-black rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={handleCloseClick}>Close</button>
               <h2 className="text-xl mb-4">{selectedItem.metadata.title[0]}</h2>
+              <h3 className="text-lg font-semibold">Score: {selectedItem.score}</h3>
               {Object.entries(selectedItem.metadata).map(([key, value]) => {
                 if (key !== 'keywords' && key !== 'title') {
                   if (key === 'identifier') {
@@ -201,14 +191,14 @@ const App: React.FC<AppProps> = ({ inputString }) => {
 
           ) : (
             <ul>
-              {tenderData.map((item, index) => (
+              {tenderData.sort((a, b) => b.score - a.score).map((item, index) => (
                 item.content.length > 0 &&
                 <div
                   className='border-2 m-2 py-2 px-4 border-black rounded-md sm:hover:bg-primary-100 sm:hover:shadow-lg'
                   key={index}
                   onClick={() => handleItemClick(item)}
                 >
-                  <p>{item.content}</p>
+                  <p>{item.content} <b>{Math.round(item.score)}%</b></p>
                 </div>
               ))}
             </ul>

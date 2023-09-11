@@ -6,10 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FundingController = void 0;
 const axios_1 = __importDefault(require("axios"));
 const form_data_1 = __importDefault(require("form-data"));
-const ParameterController_1 = require("./ParameterController");
+const scrape_1 = require("./scrape");
+const suitability_1 = require("../utils/suitability");
+const puppeteer_1 = __importDefault(require("puppeteer"));
 class FundingController {
     static async searchTenders(req, res) {
         const framework = req.query.framework;
+        const researchIdea = req.body.researchIdea;
         try {
             console.log('searchTenders: Preparing query data');
             const formData = new form_data_1.default();
@@ -17,7 +20,7 @@ class FundingController {
                 "bool": {
                     "must": [
                         { "terms": { "type": ["1", "2", "8"] } },
-                        { "terms": { "status": ["31094501", "31094502"] } },
+                        { "terms": { "status": ["31094501", "31094502", "31094503"] } },
                         { "term": { "programmePeriod": "2021 - 2027" } },
                         { "terms": { "frameworkProgramme": [framework] } }
                     ]
@@ -32,19 +35,27 @@ class FundingController {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            const items = response.data.results; // Assuming the items are stored in a 'results' field
-            console.log(items[0]);
-            // Loop through each item and fetch the scraped content
+            const items = response.data.results.length > 10 ? response.data.results.slice(10) : response.data.results; // Assuming the items are stored in a 'results' field
+            // Initialize the browser outside the loop
+            const browser = await puppeteer_1.default.launch({
+                executablePath: puppeteer_1.default.executablePath(),
+                headless: "new",
+                args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            });
             const updatedItems = await Promise.all(items.map(async (item) => {
                 const identifier = item.metadata.identifier[0];
                 console.log(identifier);
                 const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${identifier.toLowerCase()}`;
-                const scrapedContent = await (0, ParameterController_1.scrapeContent)(url);
+                const scrapedContent = await (0, scrape_1.scrapeContent)(url, browser); // Pass the browser instance
+                const score = (0, suitability_1.compareResearchDescriptions)(researchIdea, scrapedContent);
                 return {
                     ...item,
-                    scrapedContent // Add the scraped content as a new field
+                    scrapedContent,
+                    score
                 };
             }));
+            // Close the browser after the loop
+            await browser.close();
             res.json({ results: updatedItems });
         }
         catch (error) {

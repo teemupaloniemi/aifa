@@ -4,7 +4,7 @@ import { params } from '../controllers/ParameterController';
 
 const router = express.Router();
 
-router.get('/searchTenders', FundingController.searchTenders);
+router.post('/searchTenders', FundingController.searchTenders);
 router.post('/summarize', params);
 
 export default router;

@@ -1,11 +1,15 @@
 import { Request, Response } from 'express';
 import axios from 'axios';
 import FormData from 'form-data';
-import { scrapeContent } from './ParameterController';
+import { scrapeContent } from './scrape';
+import { compareResearchDescriptions } from '../utils/suitability';
+import puppeteer, { Browser } from 'puppeteer';
 
 class FundingController {
   static async searchTenders(req: Request, res: Response): Promise<void> {
     const framework = req.query.framework as string;
+    const researchIdea = req.body.researchIdea as string;
+
     try {
       console.log('searchTenders: Preparing query data');
 
@@ -15,7 +19,7 @@ class FundingController {
         "bool": {
           "must": [
             { "terms": { "type": ["1", "2", "8"] } },
-            { "terms": { "status": ["31094501", "31094502"] } },
+            { "terms": { "status": ["31094501","31094502","31094503"] } }, //["31094501", "31094502"]
             { "term": { "programmePeriod": "2021 - 2027" } },
             { "terms": { "frameworkProgramme": [framework] } }
           ]
@@ -37,20 +41,30 @@ class FundingController {
           }
         }
       );
-      const items = response.data.results;  // Assuming the items are stored in a 'results' field
+      const items = response.data.results.length > 10 ? response.data.results.slice(10) : response.data.results;  // Assuming the items are stored in a 'results' field
 
-      console.log(items[0])
-      // Loop through each item and fetch the scraped content
+      // Initialize the browser outside the loop
+      const browser = await puppeteer.launch({
+        executablePath: puppeteer.executablePath(),
+        headless: "new",  // Use the new headless mode
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      });
+
       const updatedItems = await Promise.all(items.map(async (item: any) => {
         const identifier = item.metadata.identifier[0] as string;
         console.log(identifier);
         const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${identifier.toLowerCase()}`;
-        const scrapedContent = await scrapeContent(url);
+        const scrapedContent = await scrapeContent(url, browser);  // Pass the browser instance
+        const score = compareResearchDescriptions(researchIdea, scrapedContent);
         return {
           ...item,
-          scrapedContent  // Add the scraped content as a new field
+          scrapedContent,
+          score
         };
       }));
+
+      // Close the browser after the loop
+      await browser.close();
 
       res.json({ results: updatedItems });
 

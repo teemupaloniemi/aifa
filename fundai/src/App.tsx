@@ -1,44 +1,26 @@
 import React, { useState } from 'react';
 import './App.css';
-import TestScrape from "./components/TestScrape";
-import TFCall from "./components/TFCall";
+import TestScrape from "./components/ResultsView";
+import ProfileView from './components/ProfileView'
 
 function App() {
-  // State to manage the input text
-  const [inputString, setInputString] = useState('');
 
   // State to manage the display of the scrape view
   const [showScrapeView, setShowScrapeView] = useState(false);
-
-  // Handle the input change
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setInputString(event.target.value);
-  };
-
+  // State to manage the input text
+  const [inputString, setInputString] = useState('');
   // Handle the submit button click
-  const handleSubmit = () => {
+  const handleSubmit = (data: string) => {
+    setInputString(data);
     setShowScrapeView(true);
   };
 
   return (
-    <div className="App">
+    <div className="lg:mx-80 md:mx-40 my-10">
       {!showScrapeView ? (
-        <div className='border-2 border-black rounded-md p-4'>
-          <textarea
-            value={inputString}
-            onChange={handleInputChange}
-            placeholder="Enter text here..."
-            className="border-2 border-black rounded-md w-3/4 h-80 p-2"
-          ></textarea>
-          <button
-            onClick={handleSubmit}
-            className="border-2 border-black rounded-md p-4 ml-4"
-          >
-            Submit
-          </button>
-        </div>
-      ) : (
-        <TestScrape inputString={inputString} />
+          <ProfileView handleSubmit={handleSubmit}/>
+      ): (
+          <TestScrape inputString={inputString}/>
       )}
     </div>
   );
