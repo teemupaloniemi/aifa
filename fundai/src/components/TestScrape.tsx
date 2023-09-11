@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import logo from '../images/aifalogo.png';
 
 
 interface TenderData {
@@ -68,7 +69,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
   const [selectedFramework, setSelectedFramework] = useState<string>("");
   const [apiResult, setApiResult] = useState<String>("");
   const [summarizing, setSummarizing] = useState<boolean>(false);
-  
+
 
   const handleApiCall = async (url: string) => {
     try {
@@ -102,18 +103,18 @@ const App: React.FC<AppProps> = ({ inputString }) => {
   function formatText(text: string): JSX.Element[] {
     // Split the text using a regex pattern to identify titles followed by a colon
     const splitText = text.split(/(?=[A-Z][a-z]+:)/);
-    
-    return splitText.map((section, index) => {
-        // Split each section into title and content
-        const [title, ...contentArr] = section.split(':');
-        const content = contentArr.join(':'); // Join back any colons that might be in the content
 
-        return (
-            <div key={index} className="mb-4">
-                <strong className="block mb-2">{title}:</strong>
-                <p className="pl-4">{content.trim()}</p>
-            </div>
-        );
+    return splitText.map((section, index) => {
+      // Split each section into title and content
+      const [title, ...contentArr] = section.split(':');
+      const content = contentArr.join(':'); // Join back any colons that might be in the content
+
+      return (
+        <div key={index} className="mb-4">
+          <strong className="block mb-2">{title}:</strong>
+          <p className="pl-4">{content.trim()}</p>
+        </div>
+      );
     });
   }
 
@@ -130,7 +131,12 @@ const App: React.FC<AppProps> = ({ inputString }) => {
 
   return (
     <div>
-      <div className="text-lg text-center">Artificial Intelligence Funding Assistant</div>
+      <div className="text-lg text-center">
+        <span className="flex justify-center items-center">
+          <img src={logo} alt="AIPA Logo" style={{ width: "3em", height: '3em' }} />
+        </span>
+        Artificial Intelligence Funding Assistant
+      </div>
       {/* Dropdown for selecting a framework */}
       <div className="mb-4">
       <div className="mb-4">
