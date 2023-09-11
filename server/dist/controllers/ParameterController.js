@@ -3,32 +3,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.params = void 0;
+exports.scrapeContent = exports.params = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
-const openai_1 = require("openai");
 const puppeteer_1 = __importDefault(require("puppeteer"));
 dotenv_1.default.config();
-const openai = new openai_1.OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
-const params = async (req, res) => {
-    const url = req.body.url || req.query.url; // Assuming URL comes from request body or query
-    if (!url) {
-        return "No url provided!";
-    }
-    let contentPrompt = "";
-    try {
-        console.log("Launching the browser...");
-        const browser = await puppeteer_1.default.launch({
+let browser;
+const initBrowser = async () => {
+    if (!browser) {
+        browser = await puppeteer_1.default.launch({
             executablePath: puppeteer_1.default.executablePath(),
             headless: "new",
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
         });
-        console.log("Opening a new page...");
+    }
+};
+const scrapeContent = async (url) => {
+    if (!url) {
+        return "No url provided!";
+    }
+    try {
+        await initBrowser();
         const page = await browser.newPage();
-        console.log(`Navigating to URL: ${url}`);
         await page.goto(url);
-        console.log("Waiting for the main content to load...");
         await page.waitForSelector('.addListStyling p');
         console.log("Fetching paragraphs...");
         // Fetch only the paragraphs inside the scrapedContent
@@ -75,20 +71,27 @@ const params = async (req, res) => {
             });
         });
         console.log("Closing the browser...");
-        await browser.close();
-        let textContent = content.join(' ');
-        const lines = textContent.split('\n'); // Split the content by lines
-        const filteredLines = lines.filter(line => !line.startsWith('@')); // Filter out lines with '@'
-        textContent = filteredLines.join('\n'); // Join the filtered lines back into a single string
-        contentPrompt = textContent;
-        console.log(`Combined content length: ${textContent.length}`);
+        await page.close();
+        return content.join(' ');
     }
     catch (error) {
         console.log("Error:", error.message);
-        return res.status(500).send("Error occurred"); // Sending response
+        return "Error";
     }
-    console.log(`Snippet of content: ${contentPrompt}`); // Displaying the first 100 characters as a snippet
-    console.log('\x1b[32m%s\x1b[0m', "\nReturning to caller");
-    return res.send(contentPrompt);
+};
+exports.scrapeContent = scrapeContent;
+const params = async (req, res) => {
+    const url = req.body.url || req.query.url;
+    if (!url) {
+        return res.status(400).send("No url provided!");
+    }
+    try {
+        const contentPrompt = await scrapeContent(url);
+        return res.send(contentPrompt);
+    }
+    catch (error) {
+        console.log("Error:", error.message);
+        return res.status(500).send("Error occurred");
+    }
 };
 exports.params = params;

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import axios from 'axios';
 import FormData from 'form-data';
+import { scrapeContent } from './ParameterController';
 
 class FundingController {
   static async searchTenders(req: Request, res: Response): Promise<void> {
@@ -36,8 +37,23 @@ class FundingController {
           }
         }
       );
+      const items = response.data.results;  // Assuming the items are stored in a 'results' field
 
-      res.json(response.data);
+      console.log(items[0])
+      // Loop through each item and fetch the scraped content
+      const updatedItems = await Promise.all(items.map(async (item: any) => {
+        const identifier = item.metadata.identifier[0] as string;
+        console.log(identifier);
+        const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${identifier.toLowerCase()}`;
+        const scrapedContent = await scrapeContent(url);
+        return {
+          ...item,
+          scrapedContent  // Add the scraped content as a new field
+        };
+      }));
+
+      res.json({ results: updatedItems });
+
     } catch (error) {
       console.log('searchTenders: Error occurred', error);
       res.status(500).json({ message: 'Internal Server Error' });

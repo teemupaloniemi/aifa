@@ -27,6 +27,11 @@ interface Metadata {
 
 interface DetailedData {
   metadata: Metadata;
+  scrapedContent: string;
+}
+
+interface AppProps {
+  inputString: string;
 }
 
 const frameworks = [
@@ -56,7 +61,7 @@ const frameworks = [
 ];
 
 
-const App: React.FC = () => {
+const App: React.FC<AppProps> = ({ inputString }) => {
   const [tenderData, setTenderData] = useState<TenderData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<DetailedData | null>(null);
@@ -128,6 +133,17 @@ const App: React.FC = () => {
       <div className="text-lg text-center">Artificial Intelligence Funding Assistant</div>
       {/* Dropdown for selecting a framework */}
       <div className="mb-4">
+      <div className="mb-4">
+        <label htmlFor="inputString" className="block text-sm font-medium text-gray-700">Input String</label>
+        <input
+          type="text"
+          id="inputString"
+          name="inputString"
+          value={inputString}
+          readOnly
+          className="mt-1 block w-60 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+        />
+      </div>
         <select
           id="frameworkSelect"
           name="framework"
@@ -160,11 +176,9 @@ const App: React.FC = () => {
                     const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${value[0].toLowerCase()}`;
                     return (
                       <div key={key}>
-                        <p><strong>Link + {key}:</strong></p>
+                        <p><strong>Description:</strong></p>
                         <p><a href={url} className="pl-4 md:hover:underline text-primary-500">{url}</a></p>
-                        <button className='border-2 my-4 py-2 px-4 border-black rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={async () => await handleApiCall(url)}>Summarize</button>
-                        {summarizing && <div className='rounded-md border-2 border-black p-4 mb-4'>summarizing...</div> }
-                        {apiResult && formatText(apiResult as string)}
+                        {selectedItem.scrapedContent}
                       </div>
                     );
                   }

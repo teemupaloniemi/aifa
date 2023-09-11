@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FundingController = void 0;
 const axios_1 = __importDefault(require("axios"));
 const form_data_1 = __importDefault(require("form-data"));
+const ParameterController_1 = require("./ParameterController");
 class FundingController {
     static async searchTenders(req, res) {
         const framework = req.query.framework;
@@ -31,7 +32,20 @@ class FundingController {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            res.json(response.data);
+            const items = response.data.results; // Assuming the items are stored in a 'results' field
+            console.log(items[0]);
+            // Loop through each item and fetch the scraped content
+            const updatedItems = await Promise.all(items.map(async (item) => {
+                const identifier = item.metadata.identifier[0];
+                console.log(identifier);
+                const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${identifier.toLowerCase()}`;
+                const scrapedContent = await (0, ParameterController_1.scrapeContent)(url);
+                return {
+                    ...item,
+                    scrapedContent // Add the scraped content as a new field
+                };
+            }));
+            res.json({ results: updatedItems });
         }
         catch (error) {
             console.log('searchTenders: Error occurred', error);
