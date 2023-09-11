@@ -6,7 +6,7 @@ import TFCall from "./components/TFCall";
 function App() {
   return (
     <div className="App">
-      <TestScrape/>
+      <TestScrape />
     </div>
   );
 }
