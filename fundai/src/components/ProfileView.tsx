@@ -28,11 +28,11 @@ const App: React.FC<Props> = ({ handleSubmit }) => {
                     value={inputString}
                     onChange={handleInputChange}
                     placeholder="Enter text here..."
-                    className="border-2 w-full border-black rounded-md h-80 p-2"
+                    className="border-2 w-full border-primary-500 rounded-md h-80 p-2"
                 ></textarea>
                 <button
                     onClick={() => handleSubmit(inputString)}
-                    className="border-2 border-black rounded-md p-4 m-4"
+                    className="border-2 border-primary-500 rounded-md p-4 m-4 sm:hover:shadow-lg sm:hover:bg-primary-100"
                 >
                     Submit
                 </button>

@@ -5,15 +5,15 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          100: '#E5F2FA', // Lightest shade of primary
-          200: '#BFDFF5',
-          300: '#99CCF0',
-          400: '#73B9EB',
-          500: '#4DA6E6', // Default primary color
-          600: '#2783E1',
-          700: '#0160DC',
-          800: '#0048A7',
-          900: '#003073'  // Darkest shade of primary
+          100: '#E5FAF4', // Lightest shade of chalkboard green
+          200: '#BFEDDF',
+          300: '#99E0CA',
+          400: '#73D3B5',
+          500: '#4DC6A0', // Default chalkboard green
+          600: '#27B98B',
+          700: '#01AC76',
+          800: '#008A5E',
+          900: '#006846'  // Darkest shade of chalkboard green
         },
         secondary: {
           100: '#FDECEB', // Lightest shade of secondary

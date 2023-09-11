@@ -70,6 +70,8 @@ const App: React.FC<AppProps> = ({ inputString }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<DetailedData | null>(null);
   const [selectedFramework, setSelectedFramework] = useState<string>("");
+  const [inputValue, setInputValue] = useState<string>(inputString);
+
 
   const handleItemClick = (item: TenderData) => {
     // Here, you can fetch the detailed data for the clicked item if needed
@@ -108,7 +110,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
   const fetchTenders = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`http://localhost:5000/api/fundingTenders/searchTenders?framework=${selectedFramework}`, { researchIdea: inputString });
+      const response = await axios.post(`http://localhost:5000/api/fundingTenders/searchTenders?framework=${selectedFramework}`, { researchIdea: inputValue });
       setTenderData(response.data.results);
     } catch (error) {
       console.error('Error fetching tenders:', error);
@@ -131,13 +133,13 @@ const App: React.FC<AppProps> = ({ inputString }) => {
           <textarea
             id="inputString"
             name="inputString"
-            value={inputString}
-            readOnly
-            className="w-full h-40 p-4 border-2 border-black rounded-md"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            className="w-full h-40 p-4 border-2 border-primary-500 rounded-md"
           />
         </div>
-        <div className="flex">
-        <button className='border-2 py-2 px-4 border-black rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={fetchTenders}>Fetch Funding Opportunities</button>
+        <div className="flex justify-center">
+          <button className='border-2 py-2 px-4 border-primary-500 rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={fetchTenders}>Fetch Funding Opportunities</button>
           <select
             id="frameworkSelect"
             name="framework"
@@ -162,8 +164,8 @@ const App: React.FC<AppProps> = ({ inputString }) => {
       ) : (
         <>
           {selectedItem ? (
-            <div className='flex flex-col items-start border-2 m-2 py-2 px-4 border-black rounded-md'>
-              <button className='border-2 my-4 py-2 px-4 border-black rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={handleCloseClick}>Close</button>
+            <div className='flex flex-col items-start border-2 m-2 py-2 px-4 border-primary-500 rounded-md'>
+              <button className='border-2 my-4 py-2 px-4 border-primary-500 rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={handleCloseClick}>Close</button>
               <h2 className="text-xl mb-4">{selectedItem.metadata.title[0]}</h2>
               <h3 className="text-lg font-semibold">Score: {selectedItem.score}</h3>
               {Object.entries(selectedItem.metadata).map(([key, value]) => {
@@ -194,7 +196,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
               {tenderData.sort((a, b) => b.score - a.score).map((item, index) => (
                 item.content.length > 0 &&
                 <div
-                  className='border-2 m-2 py-2 px-4 border-black rounded-md sm:hover:bg-primary-100 sm:hover:shadow-lg'
+                  className='border-2 m-2 py-2 px-4 border-primary-500 rounded-md sm:hover:bg-primary-100 sm:hover:shadow-lg'
                   key={index}
                   onClick={() => handleItemClick(item)}
                 >
