@@ -11,7 +11,7 @@ const App: React.FC<Props> = ({ handleSubmit }) => {
     const [inputString, setInputString] = useState('');
 
     // Handle the input change
-    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleInputChange = async (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setInputString(event.target.value);
     };
 
