@@ -46,6 +46,7 @@ class FundingController {
         var _a;
         const researchIdea = req.body.researchIdea;
         let framework = "43108390"; //use horizon as default
+        let keywords = researchIdea;
         try {
             console.log('searchTenders: Preparing query data');
             try {
@@ -55,9 +56,16 @@ class FundingController {
                     model: "gpt-3.5-turbo",
                 });
                 // Log the generated completion for debugging
-                console.log("Here, ", chatCompletion.choices[0].message.content);
+                console.log("Fund ID: ", chatCompletion.choices[0].message.content);
                 const match = (_a = chatCompletion.choices[0].message.content) === null || _a === void 0 ? void 0 : _a.match(/<id>(\d+)<\/id>/);
                 framework = match ? match[1] : "43108390"; //use horizon as default
+                // Generate chat completion using OpenAI API this is for matching
+                const chatCompletion_keywords = await openai.chat.completions.create({
+                    messages: [{ role: "user", content: `I want to gnerate a list of keywords that best describe this research idea ${researchIdea}` }],
+                    model: "gpt-3.5-turbo",
+                });
+                console.log("Keywords from research idea: ", chatCompletion_keywords.choices[0].message.content);
+                keywords = chatCompletion_keywords.choices[0].message.content ? chatCompletion_keywords.choices[0].message.content : keywords;
             }
             catch (error) {
                 if (error.response) {
@@ -93,7 +101,7 @@ class FundingController {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            const items = response.data.results.length > 10 ? response.data.results.slice(10) : response.data.results; // Assuming the items are stored in a 'results' field
+            const items = response.data.results; // Assuming the items are stored in a 'results' field
             // Initialize the browser outside the loop
             const browser = await puppeteer_1.default.launch({
                 executablePath: puppeteer_1.default.executablePath(),
@@ -105,7 +113,7 @@ class FundingController {
                 console.log(identifier);
                 const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${identifier.toLowerCase()}`;
                 const scrapedContent = await (0, scrape_1.scrapeContent)(url, browser); // Pass the browser instance
-                const score = (0, suitability_1.compareResearchDescriptions)(researchIdea, scrapedContent);
+                const score = (0, suitability_1.compareResearchDescriptions)(keywords, scrapedContent);
                 return {
                     ...item,
                     scrapedContent,

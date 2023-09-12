@@ -50,6 +50,7 @@ class FundingController {
   static async searchTenders(req: Request, res: Response): Promise<void> {
     const researchIdea = req.body.researchIdea as string;
     let framework = "43108390"; //use horizon as default
+    let keywords = researchIdea;
 
     try {
       console.log('searchTenders: Preparing query data');
@@ -62,10 +63,19 @@ class FundingController {
         });
 
         // Log the generated completion for debugging
-        console.log("Here, ", chatCompletion.choices[0].message.content);
+        console.log("Fund ID: ", chatCompletion.choices[0].message.content);
 
         const match = chatCompletion.choices[0].message.content?.match(/<id>(\d+)<\/id>/);
         framework = match ? match[1] : "43108390";  //use horizon as default
+
+        // Generate chat completion using OpenAI API this is for matching
+        const chatCompletion_keywords = await openai.chat.completions.create({
+          messages: [{ role: "user", content: `I want to gnerate a list of keywords that best describe this research idea ${researchIdea}` }],
+          model: "gpt-3.5-turbo",
+        });
+
+        console.log("Keywords from research idea: ", chatCompletion_keywords.choices[0].message.content)
+        keywords = chatCompletion_keywords.choices[0].message.content ? chatCompletion_keywords.choices[0].message.content : keywords;
 
       } catch (error: any) {
         if (error.response) {
@@ -109,7 +119,7 @@ class FundingController {
           }
         }
       );
-      const items = response.data.results.length > 10 ? response.data.results.slice(10) : response.data.results;  // Assuming the items are stored in a 'results' field
+      const items = response.data.results;  // Assuming the items are stored in a 'results' field
 
       // Initialize the browser outside the loop
       const browser = await puppeteer.launch({
@@ -123,7 +133,7 @@ class FundingController {
         console.log(identifier);
         const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${identifier.toLowerCase()}`;
         const scrapedContent = await scrapeContent(url, browser);  // Pass the browser instance
-        const score = compareResearchDescriptions(researchIdea, scrapedContent);
+        const score = compareResearchDescriptions(keywords, scrapedContent);
         return {
           ...item,
           scrapedContent,
