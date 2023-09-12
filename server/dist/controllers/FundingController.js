@@ -56,7 +56,7 @@ class FundingController {
                     model: "gpt-3.5-turbo",
                 });
                 // Log the generated completion for debugging
-                console.log("Fund ID: ", chatCompletion.choices[0].message.content);
+                console.log("\n\nFund ID: ", chatCompletion.choices[0].message.content);
                 const match = (_a = chatCompletion.choices[0].message.content) === null || _a === void 0 ? void 0 : _a.match(/<id>(\d+)<\/id>/);
                 framework = match ? match[1] : "43108390"; //use horizon as default
                 // Generate chat completion using OpenAI API this is for matching
@@ -64,7 +64,7 @@ class FundingController {
                     messages: [{ role: "user", content: `I want to gnerate a list of keywords that best describe this research idea ${researchIdea}` }],
                     model: "gpt-3.5-turbo",
                 });
-                console.log("Keywords from research idea: ", chatCompletion_keywords.choices[0].message.content);
+                console.log("\n\nKeywords from research idea: ", chatCompletion_keywords.choices[0].message.content);
                 keywords = chatCompletion_keywords.choices[0].message.content ? chatCompletion_keywords.choices[0].message.content : keywords;
             }
             catch (error) {
@@ -94,12 +94,13 @@ class FundingController {
             }), 'utf-8'), { contentType: 'application/json' });
             formData.append('languages', Buffer.from(JSON.stringify(["en"]), 'utf-8'), { contentType: 'application/json' });
             formData.append('sort', Buffer.from(JSON.stringify({ "field": "sortStatus", "order": "DESC" }), 'utf-8'), { contentType: 'application/json' });
-            console.log('searchTenders: Sending request to API');
+            console.log('\n\nsearchTenders: Sending request to API');
             const response = await axios_1.default.post('https://api.tech.ec.europa.eu/search-api/prod/rest/search?apiKey=SEDIA&text=***&pageSize=50&pageNumber=1', formData, {
                 headers: {
                     ...formData.getHeaders(),
                     'Content-Type': 'multipart/form-data'
-                }
+                },
+                timeout: 300000 // 5 minutes in milliseconds
             });
             const items = response.data.results; // Assuming the items are stored in a 'results' field
             // Initialize the browser outside the loop
@@ -108,6 +109,7 @@ class FundingController {
                 headless: "new",
                 args: ['--no-sandbox', '--disable-setuid-sandbox'],
             });
+            console.log("\n\nsearching from these funds\n\n");
             const updatedItems = await Promise.all(items.map(async (item) => {
                 const identifier = item.metadata.identifier[0];
                 console.log(identifier);

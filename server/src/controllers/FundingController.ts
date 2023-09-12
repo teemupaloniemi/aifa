@@ -63,7 +63,7 @@ class FundingController {
         });
 
         // Log the generated completion for debugging
-        console.log("Fund ID: ", chatCompletion.choices[0].message.content);
+        console.log("\n\nFund ID: ", chatCompletion.choices[0].message.content);
 
         const match = chatCompletion.choices[0].message.content?.match(/<id>(\d+)<\/id>/);
         framework = match ? match[1] : "43108390";  //use horizon as default
@@ -74,7 +74,7 @@ class FundingController {
           model: "gpt-3.5-turbo",
         });
 
-        console.log("Keywords from research idea: ", chatCompletion_keywords.choices[0].message.content)
+        console.log("\n\nKeywords from research idea: ", chatCompletion_keywords.choices[0].message.content)
         keywords = chatCompletion_keywords.choices[0].message.content ? chatCompletion_keywords.choices[0].message.content : keywords;
 
       } catch (error: any) {
@@ -107,7 +107,7 @@ class FundingController {
       formData.append('languages', Buffer.from(JSON.stringify(["en"]), 'utf-8'), { contentType: 'application/json' });
       formData.append('sort', Buffer.from(JSON.stringify({ "field": "sortStatus", "order": "DESC" }), 'utf-8'), { contentType: 'application/json' });
 
-      console.log('searchTenders: Sending request to API');
+      console.log('\n\nsearchTenders: Sending request to API');
 
       const response = await axios.post(
         'https://api.tech.ec.europa.eu/search-api/prod/rest/search?apiKey=SEDIA&text=***&pageSize=50&pageNumber=1',
@@ -116,7 +116,8 @@ class FundingController {
           headers: {
             ...formData.getHeaders(),
             'Content-Type': 'multipart/form-data'
-          }
+          },
+          timeout: 300000 // 5 minutes in milliseconds
         }
       );
       const items = response.data.results;  // Assuming the items are stored in a 'results' field
@@ -127,7 +128,7 @@ class FundingController {
         headless: "new",  // Use the new headless mode
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
       });
-
+      console.log("\n\nsearching from these funds\n\n")
       const updatedItems = await Promise.all(items.map(async (item: any) => {
         const identifier = item.metadata.identifier[0] as string;
         console.log(identifier);
