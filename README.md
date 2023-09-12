@@ -26,6 +26,7 @@ With the increasing complexity and variety of R&D funding instruments available,
 
 ### Prerequisites
 - Make sure you have Node.js installed on your computer.
+- Make sure you have ```OPENAI_API_KEY=**``` in the `server` .env file.  
 
 ### Steps
 
