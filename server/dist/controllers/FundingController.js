@@ -60,24 +60,31 @@ async function processBatch(items, start, end, browser, keywords) {
 class FundingController {
     static async searchTenders(req, res) {
         var _a;
-        const researchIdea = req.body.researchIdea;
+        let researchIdea = req.body.researchIdea;
         let framework = "43108390"; //use horizon as default
         let keywords = researchIdea;
         try {
             console.log('searchTenders: Preparing query data');
             try {
+                // Generate chat completion using OpenAI API this is for matching
+                const chatCompletion_translate = await openai.chat.completions.create({
+                    messages: [{ role: "user", content: `Translate this text to english. If its already in english leave it in english. \n\n${researchIdea}` }],
+                    model: "gpt-3.5-turbo",
+                });
+                researchIdea = chatCompletion_translate.choices[0].message.content;
+                console.log("\n\nTranslated: ", researchIdea);
                 // Generate chat completion using OpenAI API
-                const chatCompletion = await openai.chat.completions.create({
+                const chatCompletion_framework = await openai.chat.completions.create({
                     messages: [{ role: "user", content: `I want to compare European Commission funding opportunities. Tell me which one of the following framework ids is a good fit for this idea\n${researchIdea}\n\nThese are the possible funds\n\n${JSON.stringify(frameworks)}.\n\nGive the best fitting fund ID in xml tags <id>the id goes here</id>` }],
                     model: "gpt-3.5-turbo",
                 });
                 // Log the generated completion for debugging
-                console.log("\n\nFund ID: ", chatCompletion.choices[0].message.content);
-                const match = (_a = chatCompletion.choices[0].message.content) === null || _a === void 0 ? void 0 : _a.match(/<id>(\d+)<\/id>/);
+                console.log("\n\nFund ID: ", chatCompletion_framework.choices[0].message.content);
+                const match = (_a = chatCompletion_framework.choices[0].message.content) === null || _a === void 0 ? void 0 : _a.match(/<id>(\d+)<\/id>/);
                 framework = match ? match[1] : "43108390"; //use horizon as default
                 // Generate chat completion using OpenAI API this is for matching
                 const chatCompletion_keywords = await openai.chat.completions.create({
-                    messages: [{ role: "user", content: `I want to gnerate a list of keywords that best describe this research idea ${researchIdea}` }],
+                    messages: [{ role: "user", content: `I want to generate a list of keywords that best describe this research idea. Keywords should be relevant for funding instrument search ${researchIdea}` }],
                     model: "gpt-3.5-turbo",
                 });
                 console.log("\n\nKeywords from research idea: ", chatCompletion_keywords.choices[0].message.content);
@@ -102,7 +109,7 @@ class FundingController {
                 "bool": {
                     "must": [
                         { "terms": { "type": ["1", "2", "8"] } },
-                        { "terms": { "status": ["31094501", "31094502"] } },
+                        { "terms": { "status": ["31094501"] } },
                         { "term": { "programmePeriod": "2021 - 2027" } },
                         { "terms": { "frameworkProgramme": [framework] } }
                     ]
@@ -125,7 +132,6 @@ class FundingController {
                 headless: "new",
                 args: ['--no-sandbox', '--disable-setuid-sandbox'],
             });
-            console.log("\n\nsearching from these funds\n\n");
             const updatedItems = [];
             // Define batch size
             const batchSize = 50;

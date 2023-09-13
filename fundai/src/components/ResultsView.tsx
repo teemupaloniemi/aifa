@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import logo from '../images/aifalogo.png';
 
@@ -72,6 +72,24 @@ const App: React.FC<AppProps> = ({ inputString }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<DetailedData | null>(null);
   const [inputValue, setInputValue] = useState<string>(inputString);
+  const [secondsElapsed, setSecondsElapsed] = useState<number>(0);
+
+  useEffect(() => {
+    let timerId: number | null = null;
+    if (isLoading) {
+      setSecondsElapsed(0); // Reset the timer
+      timerId = window.setInterval(() => {
+        setSecondsElapsed(prevSeconds => prevSeconds + 1);
+      }, 1000);
+    } else {
+      setSecondsElapsed(0); // Reset the timer when loading is done
+    }
+    return () => {
+      if (timerId !== null) {
+        window.clearInterval(timerId);
+      }
+    };
+  }, [isLoading]);
 
 
   const handleItemClick = (item: DetailedData) => {
@@ -138,7 +156,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
 
 
       {isLoading ? (
-        <p>Loading...</p>
+        <p>Loading... Time elapsed: {secondsElapsed} seconds (I can promise results in 200 seconds)</p>
       ) : (
         <>
           {selectedItem ? (
