@@ -1,10 +1,7 @@
-// utility.ts
-
 /**
  * Utility functions for assessment of items.
  */
-
-// Function to compare two research descriptions
+// Function to compare two descriptions
 export const compareResearchDescriptions = (researchIdea: string, researchInstrument: string): number => {
     // Convert both descriptions to lowercase and split them into arrays of words
     const ideaWords = researchIdea.toLowerCase().split(/\s+/);
@@ -28,10 +25,3 @@ export const compareResearchDescriptions = (researchIdea: string, researchInstru
   
     return score;
   };
-  
-  // Additional utility functions can be added below
-  
-  // export const anotherFunction = (param1: Type, param2: Type): ReturnType => {
-  //   // Logic goes here
-  // };
-  

@@ -15,10 +15,11 @@ const scrapeContent = async (url: string, browser: Browser): Promise<string> => 
     try {
 
         const page = await browser.newPage();
+        page.setDefaultNavigationTimeout(120000);
         await page.goto(url);
-        await page.waitForSelector('.addListStyling p');
+        await page.waitForSelector('.addListStyling p', {timeout: 120000});
 
-        console.log("Fetching paragraphs...");
+        //console.log("Fetching paragraphs...");
         // Fetch only the paragraphs inside the scrapedContent
         const content = await page.$$eval('.addListStyling', elements => {
             return elements.map(el => {

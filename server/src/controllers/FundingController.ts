@@ -46,6 +46,23 @@ const frameworks: Framework[] = [
   { id: "43254019", name: "European Social Fund + (ESF)", keywords: "Employment, Social Inclusion, Education" }
 ];
 
+// Function to process a batch of items
+async function processBatch(items: any[], start: number, end: number, browser: Browser, keywords: string): Promise<any[]> {
+  const batch = items.slice(start, end);
+  return await Promise.all(batch.map(async (item: any) => {
+    const identifier = item.metadata.identifier[0] as string;
+    //console.log(identifier);
+    const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${identifier.toLowerCase()}`;
+    const scrapedContent = await scrapeContent(url, browser);
+    const score = compareResearchDescriptions(keywords, scrapedContent);
+    return {
+      ...item,
+      scrapedContent,
+      score
+    };
+  }));
+}
+
 class FundingController {
   static async searchTenders(req: Request, res: Response): Promise<void> {
     const researchIdea = req.body.researchIdea as string;
@@ -97,7 +114,7 @@ class FundingController {
         "bool": {
           "must": [
             { "terms": { "type": ["1", "2", "8"] } },
-            { "terms": { "status": ["31094501", "31094502", "31094503"] } }, //["31094501", "31094502"]
+            { "terms": { "status": ["31094501", "31094502"] } }, //["31094501", "31094502"], ["31094501", "31094502", "31094503"]
             { "term": { "programmePeriod": "2021 - 2027" } },
             { "terms": { "frameworkProgramme": [framework] } }
           ]
@@ -110,7 +127,7 @@ class FundingController {
       console.log('\n\nsearchTenders: Sending request to API');
 
       const response = await axios.post(
-        'https://api.tech.ec.europa.eu/search-api/prod/rest/search?apiKey=SEDIA&text=***&pageSize=50&pageNumber=1',
+        'https://api.tech.ec.europa.eu/search-api/prod/rest/search?apiKey=SEDIA&text=***&pageSize=500&pageNumber=1',
         formData,
         {
           headers: {
@@ -129,22 +146,22 @@ class FundingController {
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
       });
       console.log("\n\nsearching from these funds\n\n")
-      const updatedItems = await Promise.all(items.map(async (item: any) => {
-        const identifier = item.metadata.identifier[0] as string;
-        console.log(identifier);
-        const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${identifier.toLowerCase()}`;
-        const scrapedContent = await scrapeContent(url, browser);  // Pass the browser instance
-        const score = compareResearchDescriptions(keywords, scrapedContent);
-        return {
-          ...item,
-          scrapedContent,
-          score
-        };
-      }));
+      const updatedItems: any[] = [];
+
+      // Define batch size
+      const batchSize = 50;
+      console.log("\nBatch size:", batchSize);
+
+      for (let i = 0; i < items.length; i += batchSize) {
+        console.log(`Analyzing batch: ${i}-${Math.min(i + batchSize, items.length)}`)
+        const endIndex = Math.min(i + batchSize, items.length);  // Calculate end index dynamically
+        const batchResult = await processBatch(items, i, endIndex, browser, keywords);
+        updatedItems.push(...batchResult);
+      }
 
       // Close the browser after the loop
       await browser.close();
-
+      console.log("\n\nResults found:", updatedItems.length);
       res.json({ results: updatedItems });
 
     } catch (error) {

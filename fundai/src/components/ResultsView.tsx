@@ -18,6 +18,7 @@ interface Metadata {
   callIdentifier: string[];
   frameworkProgramme: string[];
   startDate: string[];
+  deadlineDate: string[];
 }
 
 interface DetailedData {
@@ -140,12 +141,23 @@ const App: React.FC<AppProps> = ({ inputString }) => {
         <p>Loading...</p>
       ) : (
         <>
-         {selectedItem ? (
+          {selectedItem ? (
             <div className='flex flex-col items-start border-2 m-2 py-2 px-4 border-primary-500 rounded-md'>
               <button className='border-2 my-4 py-2 px-4 border-primary-500 rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={handleCloseClick}>Close</button>
-              <h2 className="text-xl mb-4">{selectedItem.metadata.title[0]}</h2>
-              <h3 className="text-lg font-semibold">Score: {selectedItem.score}</h3>
-              {Object.entries(selectedItem.metadata).map(([key, value]) => {
+              <div className="text-xl mb-4">{selectedItem.metadata.title[0]} --- <strong>Score: {Math.round(selectedItem.score)}</strong></div>
+              
+              {/* Täämän alta voi poistaa jos laittaa kaikki  näkyviin*/}
+              <div>
+                <p><strong>Deadline:</strong></p>
+                <p className="pl-4">{selectedItem.metadata.deadlineDate[0]}</p>
+              </div>
+              <div>
+                <p><strong>Description:</strong></p>
+                <p><a href={`https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${selectedItem.metadata.identifier[0].toLowerCase()}`} className="pl-4 md:hover:underline text-primary-500">{`https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${selectedItem.metadata.identifier[0].toLowerCase()}`}</a></p>
+                <div className="mt-4">{selectedItem.scrapedContent.split(/outcome|objective/id)[1]?.slice(2,300)}...</div>
+              </div>
+              {/* Täämän yltä voi poistaa jos laittaa kaikki  näkyviin*/}
+              {/*Object.entries(selectedItem.metadata).map(([key, value]) => {
                 if (key !== 'keywords' && key !== 'title') {
                   if (key === 'identifier') {
                     const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${value[0].toLowerCase()}`;
@@ -165,31 +177,31 @@ const App: React.FC<AppProps> = ({ inputString }) => {
                   );
                 }
                 return null;  // Return null if the key is 'keywords'
-              })}
+              })*/}
             </div>
 
           ) : (
-          Object.keys(groupedTenders).map((frameworkId: string) => {
-            const framework = frameworks.find((f) => f.id === frameworkId);
-            return (
-              <div key={frameworkId}>
-                <h2 className="text-xl mb-2">
-                  {framework?.name} - {framework?.keywords}
-                </h2>
-                <ul>
-                  {groupedTenders[frameworkId].sort((a,b) => b.score - a.score).map((item, index) => (
-                    <li
-                      className='border-2 m-2 py-2 px-4 border-primary-500 rounded-md sm:hover:bg-primary-100 sm:hover:shadow-lg'
-                      key={index}
-                      onClick={() => handleItemClick(item)}
-                    >
-                      <p>{item.content} <b>{Math.round(item.score)}%</b></p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          }))}
+            Object.keys(groupedTenders).map((frameworkId: string) => {
+              const framework = frameworks.find((f) => f.id === frameworkId);
+              return (
+                <div key={frameworkId}>
+                  <h2 className="text-xl mb-2">
+                    {framework?.name} - {framework?.keywords}
+                  </h2>
+                  <ul>
+                    {groupedTenders[frameworkId].sort((a, b) => b.score - a.score).map((item, index) => (
+                      <li
+                        className='border-2 m-2 py-2 px-4 border-primary-500 rounded-md sm:hover:bg-primary-100 sm:hover:shadow-lg'
+                        key={index}
+                        onClick={() => handleItemClick(item)}
+                      >
+                        <p>{item.content} <b>{Math.round(item.score)}%</b></p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            }))}
         </>
       )}
     </div>

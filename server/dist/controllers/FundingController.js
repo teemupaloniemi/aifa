@@ -41,6 +41,22 @@ const frameworks = [
     { id: "43392145", name: "European Maritime, Fisheries and Aquaculture Fund (EMFAF)", keywords: "Maritime, Fisheries, Aquaculture, Sustainability" },
     { id: "43254019", name: "European Social Fund + (ESF)", keywords: "Employment, Social Inclusion, Education" }
 ];
+// Function to process a batch of items
+async function processBatch(items, start, end, browser, keywords) {
+    const batch = items.slice(start, end);
+    return await Promise.all(batch.map(async (item) => {
+        const identifier = item.metadata.identifier[0];
+        //console.log(identifier);
+        const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${identifier.toLowerCase()}`;
+        const scrapedContent = await (0, scrape_1.scrapeContent)(url, browser);
+        const score = (0, suitability_1.compareResearchDescriptions)(keywords, scrapedContent);
+        return {
+            ...item,
+            scrapedContent,
+            score
+        };
+    }));
+}
 class FundingController {
     static async searchTenders(req, res) {
         var _a;
@@ -86,7 +102,7 @@ class FundingController {
                 "bool": {
                     "must": [
                         { "terms": { "type": ["1", "2", "8"] } },
-                        { "terms": { "status": ["31094501", "31094502", "31094503"] } },
+                        { "terms": { "status": ["31094501", "31094502"] } },
                         { "term": { "programmePeriod": "2021 - 2027" } },
                         { "terms": { "frameworkProgramme": [framework] } }
                     ]
@@ -95,7 +111,7 @@ class FundingController {
             formData.append('languages', Buffer.from(JSON.stringify(["en"]), 'utf-8'), { contentType: 'application/json' });
             formData.append('sort', Buffer.from(JSON.stringify({ "field": "sortStatus", "order": "DESC" }), 'utf-8'), { contentType: 'application/json' });
             console.log('\n\nsearchTenders: Sending request to API');
-            const response = await axios_1.default.post('https://api.tech.ec.europa.eu/search-api/prod/rest/search?apiKey=SEDIA&text=***&pageSize=50&pageNumber=1', formData, {
+            const response = await axios_1.default.post('https://api.tech.ec.europa.eu/search-api/prod/rest/search?apiKey=SEDIA&text=***&pageSize=500&pageNumber=1', formData, {
                 headers: {
                     ...formData.getHeaders(),
                     'Content-Type': 'multipart/form-data'
@@ -110,20 +126,19 @@ class FundingController {
                 args: ['--no-sandbox', '--disable-setuid-sandbox'],
             });
             console.log("\n\nsearching from these funds\n\n");
-            const updatedItems = await Promise.all(items.map(async (item) => {
-                const identifier = item.metadata.identifier[0];
-                console.log(identifier);
-                const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${identifier.toLowerCase()}`;
-                const scrapedContent = await (0, scrape_1.scrapeContent)(url, browser); // Pass the browser instance
-                const score = (0, suitability_1.compareResearchDescriptions)(keywords, scrapedContent);
-                return {
-                    ...item,
-                    scrapedContent,
-                    score
-                };
-            }));
+            const updatedItems = [];
+            // Define batch size
+            const batchSize = 50;
+            console.log("\nBatch size:", batchSize);
+            for (let i = 0; i < items.length; i += batchSize) {
+                console.log(`Analyzing batch: ${i}-${Math.min(i + batchSize, items.length)}`);
+                const endIndex = Math.min(i + batchSize, items.length); // Calculate end index dynamically
+                const batchResult = await processBatch(items, i, endIndex, browser, keywords);
+                updatedItems.push(...batchResult);
+            }
             // Close the browser after the loop
             await browser.close();
+            console.log("\n\nResults found:", updatedItems.length);
             res.json({ results: updatedItems });
         }
         catch (error) {
