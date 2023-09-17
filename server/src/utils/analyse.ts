@@ -30,7 +30,7 @@ export async function analyse(allItems: any[], keywords: string): Promise<any[]>
     const batchSize = 50;
 
     for (let i = 0; i < allItems.length; i += batchSize) {
-        console.log(`Analyzing batch: ${i}-${Math.min(i + batchSize, allItems.length)}`)
+        console.log(`\nAnalyzing batch: ${i}-${Math.min(i + batchSize, allItems.length)}`)
         const endIndex = Math.min(i + batchSize, allItems.length);
         const batchResult = await processBatch(allItems, i, endIndex, browser, keywords);
         updatedItems.push(...batchResult);

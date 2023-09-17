@@ -4,11 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FundingController = void 0;
-const search_1 = require("./search");
-const translate_1 = require("./translate");
-const keywords_1 = require("./keywords");
-const selectFramework_1 = require("./selectFramework");
-const analyse_1 = require("./analyse");
+const search_1 = require("../utils/search");
+const translate_1 = require("../utils/translate");
+const keywords_1 = require("../utils/keywords");
+const selectFramework_1 = require("../utils/selectFramework");
+const analyse_1 = require("../utils/analyse");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const frameworks = [
@@ -44,8 +44,8 @@ class FundingController {
             console.log('searchTenders: Preparing query data');
             const translatedResearchIdea = await (0, translate_1.translateText)(researchIdea);
             const fittingFrameworks = await (0, selectFramework_1.selectFramework)(translatedResearchIdea, frameworks);
-            const keywords = await (0, keywords_1.getKeywords)(translatedResearchIdea);
             const allItems = await (0, search_1.searchFromFrameworks)(fittingFrameworks);
+            const keywords = await (0, keywords_1.getKeywords)(translatedResearchIdea);
             const analysed_results = await (0, analyse_1.analyse)(allItems, keywords);
             console.log("Ready, sending results back!");
             res.json({ results: analysed_results });
