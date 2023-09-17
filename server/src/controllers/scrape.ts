@@ -1,10 +1,8 @@
 import dotenv from 'dotenv';
-import puppeteer, { Browser } from 'puppeteer';
-import { Request, Response } from 'express';
+import { Browser } from 'puppeteer';
+
 
 dotenv.config();
-
-
 
 const scrapeContent = async (url: string, browser: Browser): Promise<string> => {
     
@@ -19,58 +17,48 @@ const scrapeContent = async (url: string, browser: Browser): Promise<string> => 
         await page.goto(url);
         await page.waitForSelector('.addListStyling p', {timeout: 120000});
 
-        //console.log("Fetching paragraphs...");
         // Fetch only the paragraphs inside the scrapedContent
         const content = await page.$$eval('.addListStyling', elements => {
             return elements.map(el => {
+                // Extract the label from the ux-panel attribute
+                const label = el.closest('ux-panel')?.getAttribute('label') || 'Unknown';
                 const spanText = el.querySelector('.topicdescriptionkind')?.textContent || '';
 
-                // Extract paragraphs
-                const pTexts = Array.from(el.querySelectorAll('p')).map(p => p.textContent).join('\n');
+                let combinedText = `${label} - ${spanText}:\n\n`;
 
-                // Extract lists and convert them to coherent strings
-                const listTexts = Array.from(el.querySelectorAll('ul')).map(ul => {
-                    return Array.from(ul.querySelectorAll('li')).map(li => {
-                        return `• ${li.textContent?.trim()}`;
-                    }).join('\n');
-                }).join('\n\n'); // Separate lists with two newlines
+                // Process child nodes in order
+                el.childNodes.forEach(node => {
+                    if (node instanceof Element) {
+                        if (node.nodeName === 'P') {
+                            combinedText += node.textContent + '\n\n';
+                        } else if (node.nodeName === 'UL') {
+                            combinedText += Array.from(node.querySelectorAll('li')).map(li => `• ${li.textContent?.trim()}`).join('\n') + '\n\n';
+                        } else if (node.nodeName === 'TABLE') {
+                            const headerRows = Array.from(node.querySelectorAll('thead tr')).map(row => {
+                                return Array.from(row.querySelectorAll('td, th')).map(cell => {
+                                    const pTexts = Array.from(cell.querySelectorAll('p')).map(p => p.textContent?.trim());
+                                    return pTexts.length > 0 ? pTexts.join(' ') : cell.textContent?.trim();
+                                }).join(' - ');
+                            }).join('\n');
+                            const bodyRows = Array.from(node.querySelectorAll('tbody tr')).map(row => {
+                                return Array.from(row.querySelectorAll('td, th')).map(cell => {
+                                    const pTexts = Array.from(cell.querySelectorAll('p')).map(p => p.textContent?.trim());
+                                    return pTexts.length > 0 ? pTexts.join(' ') : cell.textContent?.trim();
+                                }).join(' - ');
+                            }).join('\n');
+                            combinedText += `${headerRows}\n${bodyRows}\n\n`;
+                        }
+                    }
+                });
 
-                // Extract tables and convert them to coherent strings
-                const tableTexts = Array.from(el.querySelectorAll('table')).map(table => {
-                    const headerRows = Array.from(table.querySelectorAll('thead tr')).map(row => {
-                        const cells = Array.from(row.querySelectorAll('td, th')).map(cell => {
-                            // Extract text from <p> elements inside the cell, if they exist
-                            const pTexts = Array.from(cell.querySelectorAll('p')).map(p => p.textContent?.trim());
-                            // If there are <p> elements, join their texts, otherwise use the cell's text content
-                            return pTexts.length > 0 ? pTexts.join(' ') : cell.textContent?.trim();
-                        }).join(' - ');
-                        return cells;
-                    }).join('\n');
-
-                    const bodyRows = Array.from(table.querySelectorAll('tbody tr')).map(row => {
-                        const cells = Array.from(row.querySelectorAll('td, th')).map(cell => {
-                            // Extract text from <p> elements inside the cell, if they exist
-                            const pTexts = Array.from(cell.querySelectorAll('p')).map(p => p.textContent?.trim());
-                            // If there are <p> elements, join their texts, otherwise use the cell's text content
-                            return pTexts.length > 0 ? pTexts.join(' ') : cell.textContent?.trim();
-                        }).join(' - ');
-                        return cells;
-                    }).join('\n');
-
-                    return `${headerRows}\n${bodyRows}`;
-                }).join('\n\n'); // Separate tables with two newlines
-
-                // Combine title, paragraph texts, list texts, and table texts
-                const combinedText = `${spanText}:\n${pTexts}\n${listTexts}\n${tableTexts}`;
-                return combinedText;
+                return combinedText.trim();
             });
         });
-
 
         console.log("Closing the browser...");
         await page.close();
 
-        return content.join(' ');
+        return content.join("\n\n");
 
     } catch (error: any) {
         console.log("Error:", error.message);

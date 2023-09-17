@@ -124,7 +124,7 @@ class FundingController {
         "bool": {
           "must": [
             { "terms": { "type": ["1", "2", "8"] } },
-            { "terms": { "status": ["31094501"] } }, //["31094501", "31094502"], ["31094501", "31094502", "31094503"]
+            { "terms": { "status": ["31094501"] } }, // "31094501" forthcoming, "31094502" open, "31094503" closed
             { "term": { "programmePeriod": "2021 - 2027" } },
             { "terms": { "frameworkProgramme": [framework] } }
           ]

@@ -126,13 +126,22 @@ const App: React.FC<AppProps> = ({ inputString }) => {
     setIsLoading(false);
   };
 
+  function formatDateToYearMonth(dateString: string): string {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const month = monthNames[date.getMonth()];
+    const day = date.getDate();
+    return `${year} ${month} ${day}`;
+  }
+
   const groupedTenders = groupByFramework(tenderData);
 
   return (
     <div>
       <div className="text-lg text-center">
         <span className="flex justify-center items-center">
-          <img src={logo} alt="AIPA Logo" style={{ width: "3em", height: '3em' }} />
+          <img src={logo} alt="AIPA Logo" style={{ width: "4em", height: '4em' }} />
         </span>
         Artificial Intelligence Funding Assistant
       </div>
@@ -164,7 +173,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
               <button className='border-2 my-4 py-2 px-4 border-primary-500 rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={handleCloseClick}>Close</button>
               <div className="text-xl mb-4">{selectedItem.metadata.title[0]} --- <strong>Score: {Math.round(selectedItem.score)}</strong></div>
               
-              {/* Täämän alta voi poistaa jos laittaa kaikki  näkyviin*/}
+              {/* Täämän alta voi poistaa jos laittaa kaikki  näkyviin}
               <div>
                 <p><strong>Deadline:</strong></p>
                 <p className="pl-4">{selectedItem.metadata.deadlineDate[0]}</p>
@@ -175,17 +184,19 @@ const App: React.FC<AppProps> = ({ inputString }) => {
                 <div className="mt-4">{selectedItem.scrapedContent.split(/outcome|objective/id)[1]?.slice(2,300)}...</div>
               </div>
               {/* Täämän yltä voi poistaa jos laittaa kaikki  näkyviin*/}
+              <div>
+                <p><strong>Description:</strong></p>
+                <textarea readOnly className="w-full h-96 p-4 border-2 rounded-md border-primary-500">{selectedItem.scrapedContent}</textarea>
+                <p><a href={`https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${selectedItem.metadata.identifier[0].toLowerCase()}`} className="pl-4 md:hover:underline text-primary-500">https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/{selectedItem.metadata.identifier[0].toLowerCase()}</a></p>
+              </div>
+              <div>
+                <p><strong>Deadline:</strong></p>
+                <p>{formatDateToYearMonth(selectedItem.metadata.deadlineDate[0])}</p>
+              </div>
               {/*Object.entries(selectedItem.metadata).map(([key, value]) => {
                 if (key !== 'keywords' && key !== 'title') {
-                  if (key === 'identifier') {
-                    const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${value[0].toLowerCase()}`;
-                    return (
-                      <div key={key}>
-                        <p><strong>Description:</strong></p>
-                        <p><a href={url} className="pl-4 md:hover:underline text-primary-500">{url}</a></p>
-                        {selectedItem.scrapedContent}
-                      </div>
-                    );
+                  if (key === 'identifier' || key === 'deadlineDate') {
+                    return null;
                   }
                   return (
                     <div key={key}>
@@ -213,7 +224,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
                         key={index}
                         onClick={() => handleItemClick(item)}
                       >
-                        <p>{item.content} <b>{Math.round(item.score)}%</b></p>
+                        <p>{item.metadata.title[0]} <b>{Math.round(item.score)}%</b></p>
                       </li>
                     ))}
                   </ul>
