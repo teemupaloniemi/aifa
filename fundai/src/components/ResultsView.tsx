@@ -128,12 +128,22 @@ const App: React.FC<AppProps> = ({ inputString }) => {
 
   function formatDateToYearMonth(dateString: string): string {
     const date = new Date(dateString);
+    const currentDate = new Date();
     const year = date.getFullYear();
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const month = monthNames[date.getMonth()];
     const day = date.getDate();
-    return `${year} ${month} ${day}`;
-  }
+
+    // Calculate months left
+    let monthsLeft = (date.getFullYear() - currentDate.getFullYear()) * 12 + date.getMonth() - currentDate.getMonth();
+    if (currentDate.getDate() > day) monthsLeft--;  // Adjust if the day of the month has passed
+
+    const monthsLeftText = monthsLeft > 0 ? ` (${monthsLeft} month${monthsLeft > 1 ? 's' : ''} left)` : monthsLeft < 0 ? ` (${Math.abs(monthsLeft)} month${Math.abs(monthsLeft) > 1 ? 's' : ''} ago)` : '';
+
+    return `${year} ${month} ${day}${monthsLeftText}`;
+}
+
+
 
   const groupedTenders = groupByFramework(tenderData);
 
@@ -148,7 +158,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
       {/* Dropdown for selecting a framework */}
       <div className="mb-4">
         <div className="mb-4">
-          <label htmlFor="inputString" className="block text-sm font-medium text-gray-700">Your Research Idea</label>
+          <label htmlFor="inputString" className="block text-sm font-medium text-gray-700">Your Research or Development Idea</label>
           <textarea
             id="inputString"
             name="inputString"
@@ -162,11 +172,9 @@ const App: React.FC<AppProps> = ({ inputString }) => {
         </div>
       </div>
 
-
-
       {isLoading ? (
         <p>Loading... Time elapsed: {secondsElapsed} seconds (I can promise results in 200 seconds)</p>
-      ) : (
+      ) : (tenderData.length === 0 ? <div>No forthcoming grants for this idea found</div> : 
         <>
           {selectedItem ? (
             <div className='flex flex-col items-start border-2 m-2 py-2 px-4 border-primary-500 rounded-md'>
@@ -218,15 +226,18 @@ const App: React.FC<AppProps> = ({ inputString }) => {
                     {framework?.name} - {framework?.keywords}
                   </h2>
                   <ul>
-                    {groupedTenders[frameworkId].sort((a, b) => b.score - a.score).map((item, index) => (
-                      <li
-                        className='border-2 m-2 py-2 px-4 border-primary-500 rounded-md sm:hover:bg-primary-100 sm:hover:shadow-lg'
-                        key={index}
-                        onClick={() => handleItemClick(item)}
-                      >
-                        <p>{item.metadata.title[0]} <b>{Math.round(item.score)}%</b></p>
-                      </li>
-                    ))}
+                    {groupedTenders[frameworkId]
+                      .sort((a, b) => b.score - a.score)
+                      .slice(0, 5)  // This will take only the first 5 items
+                      .map((item, index) => (
+                        <li
+                          className='border-2 m-2 py-2 px-4 border-primary-500 rounded-md sm:hover:bg-primary-100 sm:hover:shadow-lg'
+                          key={index}
+                          onClick={() => handleItemClick(item)}
+                        >
+                          <p>{item.metadata.title[0]} <b>{Math.round(item.score)}%</b></p>
+                        </li>
+                      ))}
                   </ul>
                 </div>
               );
