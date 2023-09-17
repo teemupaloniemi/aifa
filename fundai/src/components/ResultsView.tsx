@@ -91,6 +91,20 @@ const App: React.FC<AppProps> = ({ inputString }) => {
     };
   }, [isLoading]);
 
+  // State to track expanded groups
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
+
+  // Toggle expanded state for a group
+  const toggleExpanded = (frameworkId: string) => {
+    setExpandedGroups(prevState => {
+      if (prevState.includes(frameworkId)) {
+        return prevState.filter(id => id !== frameworkId);
+      } else {
+        return [...prevState, frameworkId];
+      }
+    });
+  };
+
 
   const handleItemClick = (item: DetailedData) => {
     // Here, you can fetch the detailed data for the clicked item if needed
@@ -120,6 +134,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
     try {
       const response = await axios.post(`http://localhost:5000/api/fundingTenders/searchTenders`, { researchIdea: inputValue });
       setTenderData(response.data.results);
+      if (response.data.results.length === 0) alert("No Results Found :(")
     } catch (error) {
       console.error('Error fetching tenders:', error);
     }
@@ -141,7 +156,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
     const monthsLeftText = monthsLeft > 0 ? ` (${monthsLeft} month${monthsLeft > 1 ? 's' : ''} left)` : monthsLeft < 0 ? ` (${Math.abs(monthsLeft)} month${Math.abs(monthsLeft) > 1 ? 's' : ''} ago)` : '';
 
     return `${year} ${month} ${day}${monthsLeftText}`;
-}
+  }
 
 
 
@@ -168,30 +183,18 @@ const App: React.FC<AppProps> = ({ inputString }) => {
           />
         </div>
         <div className="flex justify-center">
-          <button className='border-2 py-2 px-4 border-primary-500 rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={fetchTenders}>Fetch Funding Opportunities</button>
+          <button className='border-2 py-2 px-4 border-primary-500 rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={fetchTenders}>Search Funding Opportunities</button>
         </div>
       </div>
 
       {isLoading ? (
         <p>Loading... Time elapsed: {secondsElapsed} seconds (I can promise results in 200 seconds)</p>
-      ) : (tenderData.length === 0 ? <div>No forthcoming grants for this idea found</div> : 
+      ) : (
         <>
           {selectedItem ? (
             <div className='flex flex-col items-start border-2 m-2 py-2 px-4 border-primary-500 rounded-md'>
               <button className='border-2 my-4 py-2 px-4 border-primary-500 rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={handleCloseClick}>Close</button>
               <div className="text-xl mb-4">{selectedItem.metadata.title[0]} --- <strong>Score: {Math.round(selectedItem.score)}</strong></div>
-              
-              {/* Täämän alta voi poistaa jos laittaa kaikki  näkyviin}
-              <div>
-                <p><strong>Deadline:</strong></p>
-                <p className="pl-4">{selectedItem.metadata.deadlineDate[0]}</p>
-              </div>
-              <div>
-                <p><strong>Description:</strong></p>
-                <p><a href={`https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${selectedItem.metadata.identifier[0].toLowerCase()}`} className="pl-4 md:hover:underline text-primary-500">{`https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${selectedItem.metadata.identifier[0].toLowerCase()}`}</a></p>
-                <div className="mt-4">{selectedItem.scrapedContent.split(/outcome|objective/id)[1]?.slice(2,300)}...</div>
-              </div>
-              {/* Täämän yltä voi poistaa jos laittaa kaikki  näkyviin*/}
               <div>
                 <p><strong>Description:</strong></p>
                 <textarea readOnly className="w-full h-96 p-4 border-2 rounded-md border-primary-500">{selectedItem.scrapedContent}</textarea>
@@ -201,25 +204,11 @@ const App: React.FC<AppProps> = ({ inputString }) => {
                 <p><strong>Deadline:</strong></p>
                 <p>{formatDateToYearMonth(selectedItem.metadata.deadlineDate[0])}</p>
               </div>
-              {/*Object.entries(selectedItem.metadata).map(([key, value]) => {
-                if (key !== 'keywords' && key !== 'title') {
-                  if (key === 'identifier' || key === 'deadlineDate') {
-                    return null;
-                  }
-                  return (
-                    <div key={key}>
-                      <p><strong>{key}:</strong></p>
-                      <p className="pl-4">{value[0]}</p>
-                    </div>
-                  );
-                }
-                return null;  // Return null if the key is 'keywords'
-              })*/}
             </div>
-
           ) : (
             Object.keys(groupedTenders).map((frameworkId: string) => {
               const framework = frameworks.find((f) => f.id === frameworkId);
+              const isExpanded = expandedGroups.includes(frameworkId);
               return (
                 <div key={frameworkId}>
                   <h2 className="text-xl mb-2">
@@ -228,7 +217,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
                   <ul>
                     {groupedTenders[frameworkId]
                       .sort((a, b) => b.score - a.score)
-                      .slice(0, 5)  // This will take only the first 5 items
+                      .slice(0, isExpanded ? undefined : 5)  // Show all items if expanded, else show only the first 5
                       .map((item, index) => (
                         <li
                           className='border-2 m-2 py-2 px-4 border-primary-500 rounded-md sm:hover:bg-primary-100 sm:hover:shadow-lg'
@@ -239,9 +228,13 @@ const App: React.FC<AppProps> = ({ inputString }) => {
                         </li>
                       ))}
                   </ul>
+                  <button className="md:hover:underline" onClick={() => toggleExpanded(frameworkId)}>
+                    {isExpanded ? "Show Less" : "Show More"}
+                  </button>
                 </div>
               );
-            }))}
+            })
+          )}
         </>
       )}
     </div>

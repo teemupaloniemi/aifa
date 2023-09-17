@@ -6,7 +6,7 @@ import ProfileView from './components/ProfileView'
 function App() {
 
   // State to manage the display of the scrape view
-  const [showScrapeView, setShowScrapeView] = useState(false);
+  const [showScrapeView, setShowScrapeView] = useState(true);
   // State to manage the input text
   const [inputString, setInputString] = useState('');
   // Handle the submit button click

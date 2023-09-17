@@ -5,11 +5,11 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          100: '#E5FAF4', // Lightest shade of chalkboard green
+          100: '#CCCCCC', // Lightest shade of chalkboard green
           200: '#BFEDDF',
           300: '#99E0CA',
           400: '#73D3B5',
-          500: '#4DC6A0', // Default chalkboard green
+          500: '#888888', // Default chalkboard green
           600: '#27B98B',
           700: '#01AC76',
           800: '#008A5E',
