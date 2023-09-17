@@ -53,10 +53,10 @@ class FundingController {
 
       const fittingFrameworks = await selectFramework(translatedResearchIdea, frameworks);
 
+      const allItems = await searchFromFrameworks(fittingFrameworks);
+      
       const keywords = await getKeywords(translatedResearchIdea);
 
-      const allItems = await searchFromFrameworks(fittingFrameworks);
-     
       const analysed_results = await analyse(allItems, keywords);
       
       console.log("Ready, sending results back!");
