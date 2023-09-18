@@ -166,14 +166,13 @@ const App: React.FC<AppProps> = ({ inputString }) => {
 
   return (
     <div>
-      <div className="text-lg text-center">
+      <div className="text-lg text-center mb-8">
         <span className="flex justify-center items-center">
           <img src={logo} alt="AIPA Logo" style={{ width: "4em", height: '4em' }} />
         </span>
         Artificial Intelligence Funding Assistant
       </div>
-      {/* Dropdown for selecting a framework */}
-      <div className="mb-4">
+      <div className="mb-4 pb-4 border-b-2">
         <div className="mb-4">
           <label htmlFor="inputString" className="block text-sm font-medium text-gray-700">Your Research or Development Idea</label>
           <textarea
@@ -221,7 +220,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
                     <ul>
                       {groupedTenders[frameworkId]
                         .sort((a, b) => b.score - a.score)
-                        .slice(0, isExpanded ? undefined : 2)  // Show all items if expanded, else show only the first 5
+                        .slice(0, isExpanded ? undefined : 3)  // Show all items if expanded, else show only the first 5
                         .map((item, index) => (
                           <li
                             className='border-2 m-2 py-2 px-4 border-primary-500 rounded-md sm:hover:bg-primary-100 sm:hover:shadow-lg'
