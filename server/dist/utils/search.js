@@ -16,7 +16,7 @@ async function searchFromFrameworks(fitting_frameworks = ["43108390"]) {
             "bool": {
                 "must": [
                     { "terms": { "type": ["1", "2", "8"] } },
-                    { "terms": { "status": ["31094501"] } },
+                    { "terms": { "status": ["31094502"] } },
                     { "term": { "programmePeriod": "2021 - 2027" } },
                     { "terms": { "frameworkProgramme": [framework.trim()] } } // Set the frameworkProgramme field
                 ]

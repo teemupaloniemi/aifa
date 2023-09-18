@@ -158,7 +158,9 @@ const App: React.FC<AppProps> = ({ inputString }) => {
     return `${year} ${month} ${day}${monthsLeftText}`;
   }
 
-
+  const maxScoreOfGroup = (tenders: DetailedData[]): number => {
+    return Math.max(...tenders.map(tender => tender.score));
+  };
 
   const groupedTenders = groupByFramework(tenderData);
 
@@ -206,34 +208,36 @@ const App: React.FC<AppProps> = ({ inputString }) => {
               </div>
             </div>
           ) : (
-            Object.keys(groupedTenders).map((frameworkId: string) => {
-              const framework = frameworks.find((f) => f.id === frameworkId);
-              const isExpanded = expandedGroups.includes(frameworkId);
-              return (
-                <div key={frameworkId}>
-                  <h2 className="text-xl mb-2">
-                    {framework?.name} - {framework?.keywords}
-                  </h2>
-                  <ul>
-                    {groupedTenders[frameworkId]
-                      .sort((a, b) => b.score - a.score)
-                      .slice(0, isExpanded ? undefined : 5)  // Show all items if expanded, else show only the first 5
-                      .map((item, index) => (
-                        <li
-                          className='border-2 m-2 py-2 px-4 border-primary-500 rounded-md sm:hover:bg-primary-100 sm:hover:shadow-lg'
-                          key={index}
-                          onClick={() => handleItemClick(item)}
-                        >
-                          <p>{item.metadata.title[0]} <b>{Math.round(item.score)}%</b></p>
-                        </li>
-                      ))}
-                  </ul>
-                  <button className="md:hover:underline" onClick={() => toggleExpanded(frameworkId)}>
-                    {isExpanded ? "Show Less" : "Show More"}
-                  </button>
-                </div>
-              );
-            })
+            Object.keys(groupedTenders)
+              .sort((a, b) => maxScoreOfGroup(groupedTenders[b]) - maxScoreOfGroup(groupedTenders[a])) // This sorts the frameworks by max score in descending order
+              .map((frameworkId: string) => {
+                const framework = frameworks.find((f) => f.id === frameworkId);
+                const isExpanded = expandedGroups.includes(frameworkId);
+                return (
+                  <div key={frameworkId}>
+                    <h2 className="text-xl mb-2">
+                      {framework?.name} - {framework?.keywords}
+                    </h2>
+                    <ul>
+                      {groupedTenders[frameworkId]
+                        .sort((a, b) => b.score - a.score)
+                        .slice(0, isExpanded ? undefined : 2)  // Show all items if expanded, else show only the first 5
+                        .map((item, index) => (
+                          <li
+                            className='border-2 m-2 py-2 px-4 border-primary-500 rounded-md sm:hover:bg-primary-100 sm:hover:shadow-lg'
+                            key={index}
+                            onClick={() => handleItemClick(item)}
+                          >
+                            <p>{item.metadata.title[0]} <b>{Math.round(item.score)}%</b></p>
+                          </li>
+                        ))}
+                    </ul>
+                    <button className="md:hover:underline mb-4" onClick={() => toggleExpanded(frameworkId)}>
+                      {isExpanded ? "Show Less" : "Show More"}
+                    </button>
+                  </div>
+                );
+              })
           )}
         </>
       )}
