@@ -1,0 +1,22 @@
+@startuml
+participant "User" as U
+participant "Application Interface" as AI
+participant "FundingController" as FC
+entity "LLM Model" as LLM
+database "Frameworks Database" as DB
+
+
+U -> AI : Input research idea
+AI -> FC : searchGrants(researchIdea)
+FC -> LLM : Translate research idea
+LLM --> FC : Return translated research idea
+FC -> LLM : Select relevant frameworks
+LLM --> FC : Return selected frameworks
+FC -> DB : Search items within selected frameworks
+DB --> FC : Return search results
+FC -> LLM : Extract keywords from translated research idea
+LLM --> FC : Return extracted keywords
+FC -> FC : Analyze results using keywords
+FC --> AI : Return analyzed results
+AI --> U : Display recommended funding instruments
+@enduml
