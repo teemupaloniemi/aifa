@@ -15,6 +15,27 @@ With the increasing complexity and variety of R&D funding instruments available,
 - **Recommendation Engine**: Generate personalized funding instrument recommendations for users.
 - **User Interface**: A simple and intuitive interface for users to input their criteria and receive recommendations.
 
+# System Flow of the R&D Funding Instruments Recommendation Engine
+
+The R&D Funding Instruments Recommendation Engine is designed to streamline the process of matching research ideas with the most suitable funding instruments. By leveraging the capabilities of Large Language Models (LLMs), the system can effectively analyze, translate, and extract relevant keywords from user input to provide tailored recommendations.
+
+## Flow Overview:
+
+1. **User Input**: Researchers input their specific research idea into the application interface.
+2. **Translation**: The research idea is translated using an LLM to ensure it aligns with the language of the funding instruments.
+3. **Framework Selection**: The LLM selects the most relevant funding frameworks based on the translated research idea.
+4. **Search**: The system searches for items within the selected frameworks.
+5. **Keyword Extraction**: The LLM extracts pertinent keywords from the translated research idea to refine the search further.
+6. **Analysis**: The system analyzes the search results using the extracted keywords to determine the most relevant funding opportunities.
+7. **Output**: The system returns a list of recommended funding instruments to the user.
+
+## System Diagram:
+
+![System Diagram](systemDiagram.png)
+
+This diagram provides a visual representation of the system's flow, highlighting the interactions between the user, the application interface, the funding controller, the frameworks database, and the LLM model.
+
+
 ## Usage
 
 1. Clone the repository.
