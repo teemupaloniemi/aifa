@@ -18,15 +18,15 @@ With the increasing complexity and variety of R&D funding instruments available,
 ## Usage
 
 1. Clone the repository.
-2. (Coming Soon) Follow the setup instructions in the `INSTALL.md` file.
+2. Follow the setup instructions below.
 3. Run the application and input your specific criteria.
 4. Receive tailored recommendations on the best-fitting R&D funding instruments.
 
 ## How to Run the Program
 
 ### Prerequisites
-- Make sure you have Node.js installed on your computer.
-- Make sure you have ```OPENAI_API_KEY=**``` in the `server` .env file.  
+- Ensure you have Node.js installed on your computer.
+- A `.env` file must be present in the `server` directory with the variable `OPENAI_API_KEY` set to your OpenAI API key.
 
 ### Steps
 
