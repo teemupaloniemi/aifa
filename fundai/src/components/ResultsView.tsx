@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import logo from '../images/aifalogo.png';
+import Header from './Header';
+import ResearchIdeaInput from './ResearchIdeaInput';
+import Loading from './Loading';
+import DetailedView from './DetailedView';
+import FrameworkList from './FrameworkList';
 
 
 interface Metadata {
@@ -72,45 +76,12 @@ const App: React.FC<AppProps> = ({ inputString }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<DetailedData | null>(null);
   const [inputValue, setInputValue] = useState<string>(inputString);
-  const [secondsElapsed, setSecondsElapsed] = useState<number>(0);
-
-  useEffect(() => {
-    let timerId: number | null = null;
-    if (isLoading) {
-      setSecondsElapsed(0); // Reset the timer
-      timerId = window.setInterval(() => {
-        setSecondsElapsed(prevSeconds => prevSeconds + 1);
-      }, 1000);
-    } else {
-      setSecondsElapsed(0); // Reset the timer when loading is done
-    }
-    return () => {
-      if (timerId !== null) {
-        window.clearInterval(timerId);
-      }
-    };
-  }, [isLoading]);
-
-  // State to track expanded groups
-  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
-
-  // Toggle expanded state for a group
-  const toggleExpanded = (frameworkId: string) => {
-    setExpandedGroups(prevState => {
-      if (prevState.includes(frameworkId)) {
-        return prevState.filter(id => id !== frameworkId);
-      } else {
-        return [...prevState, frameworkId];
-      }
-    });
-  };
 
 
   const handleItemClick = (item: DetailedData) => {
-    // Here, you can fetch the detailed data for the clicked item if needed
-    // For demonstration purposes, I'm just setting the selectedItem directly
-    setSelectedItem(item); // Typecasting for demonstration
+    setSelectedItem(item); 
   };
+
 
   const handleCloseClick = () => {
     setSelectedItem(null);
@@ -141,102 +112,22 @@ const App: React.FC<AppProps> = ({ inputString }) => {
     setIsLoading(false);
   };
 
-  function formatDateToYearMonth(dateString: string): string {
-    const date = new Date(dateString);
-    const currentDate = new Date();
-    const year = date.getFullYear();
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const month = monthNames[date.getMonth()];
-    const day = date.getDate();
-
-    // Calculate months left
-    let monthsLeft = (date.getFullYear() - currentDate.getFullYear()) * 12 + date.getMonth() - currentDate.getMonth();
-    if (currentDate.getDate() > day) monthsLeft--;  // Adjust if the day of the month has passed
-
-    const monthsLeftText = monthsLeft > 0 ? ` (${monthsLeft} month${monthsLeft > 1 ? 's' : ''} left)` : monthsLeft < 0 ? ` (${Math.abs(monthsLeft)} month${Math.abs(monthsLeft) > 1 ? 's' : ''} ago)` : '';
-
-    return `${year} ${month} ${day}${monthsLeftText}`;
-  }
-
-  const maxScoreOfGroup = (tenders: DetailedData[]): number => {
-    return Math.max(...tenders.map(tender => tender.score));
-  };
 
   const groupedTenders = groupByFramework(tenderData);
 
+  
   return (
     <div>
-      <div className="text-lg text-center mb-8">
-        <span className="flex justify-center items-center">
-          <img src={logo} alt="AIPA Logo" style={{ width: "4em", height: '4em' }} />
-        </span>
-        Artificial Intelligence Funding Assistant
-      </div>
-      <div className="mb-4 pb-4 border-b-2">
-        <div className="mb-4">
-          <label htmlFor="inputString" className="block text-sm font-medium text-gray-700">Your Research or Development Idea</label>
-          <textarea
-            id="inputString"
-            name="inputString"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            className="w-full h-40 p-4 border-2 border-primary-500 rounded-md"
-          />
-        </div>
-        <div className="flex justify-center">
-          <button className='border-2 py-2 px-4 border-primary-500 rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={fetchTenders}>Search Funding Opportunities</button>
-        </div>
-      </div>
-
+      <Header />
+      <ResearchIdeaInput inputValue={inputValue} onInputChange={setInputValue} onSearch={fetchTenders} />
       {isLoading ? (
-        <p>Loading... Time elapsed: {secondsElapsed} seconds (I can promise results in 200 seconds)</p>
+        <Loading/>
       ) : (
         <>
           {selectedItem ? (
-            <div className='flex flex-col items-start border-2 m-2 py-2 px-4 border-primary-500 rounded-md'>
-              <button className='border-2 my-4 py-2 px-4 border-primary-500 rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={handleCloseClick}>Close</button>
-              <div className="text-xl mb-4">{selectedItem.metadata.title[0]} --- <strong>Score: {Math.round(selectedItem.score)}</strong></div>
-              <div>
-                <p><strong>Description:</strong></p>
-                <textarea readOnly className="w-full h-96 p-4 border-2 rounded-md border-primary-500">{selectedItem.scrapedContent}</textarea>
-                <p><a href={`https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${selectedItem.metadata.identifier[0].toLowerCase()}`} className="pl-4 md:hover:underline text-primary-500">https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/{selectedItem.metadata.identifier[0].toLowerCase()}</a></p>
-              </div>
-              <div>
-                <p><strong>Deadline:</strong></p>
-                <p>{formatDateToYearMonth(selectedItem.metadata.deadlineDate[0])}</p>
-              </div>
-            </div>
+            <DetailedView selectedItem={selectedItem} onClose={handleCloseClick} />
           ) : (
-            Object.keys(groupedTenders)
-              .sort((a, b) => maxScoreOfGroup(groupedTenders[b]) - maxScoreOfGroup(groupedTenders[a])) // This sorts the frameworks by max score in descending order
-              .map((frameworkId: string) => {
-                const framework = frameworks.find((f) => f.id === frameworkId);
-                const isExpanded = expandedGroups.includes(frameworkId);
-                return (
-                  <div key={frameworkId}>
-                    <h2 className="text-xl mb-2">
-                      {framework?.name} - {framework?.keywords}
-                    </h2>
-                    <ul>
-                      {groupedTenders[frameworkId]
-                        .sort((a, b) => b.score - a.score)
-                        .slice(0, isExpanded ? undefined : 3)  // Show all items if expanded, else show only the first 5
-                        .map((item, index) => (
-                          <li
-                            className='border-2 m-2 py-2 px-4 border-primary-500 rounded-md sm:hover:bg-primary-100 sm:hover:shadow-lg'
-                            key={index}
-                            onClick={() => handleItemClick(item)}
-                          >
-                            <p>{item.metadata.title[0]} <b>{Math.round(item.score)}%</b></p>
-                          </li>
-                        ))}
-                    </ul>
-                    <button className="md:hover:underline mb-4" onClick={() => toggleExpanded(frameworkId)}>
-                      {isExpanded ? "Show Less" : "Show More"}
-                    </button>
-                  </div>
-                );
-              })
+            <FrameworkList groupedTenders={groupedTenders} frameworks={frameworks} onItemSelect={handleItemClick} />
           )}
         </>
       )}
