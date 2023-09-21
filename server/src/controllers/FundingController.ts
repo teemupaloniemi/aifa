@@ -49,14 +49,15 @@ class FundingController {
     try {
       console.log('searchTenders: Preparing query data');
 
+      // AI
       const translatedResearchIdea = await translateText(researchIdea); 
-
+      // AI
       const fittingFrameworks = await selectFramework(translatedResearchIdea, frameworks);
-
+      // DB
       const allItems = await searchFromFrameworks(fittingFrameworks);
-      
+      // AI
       const keywords = await getKeywords(translatedResearchIdea);
-
+      // LOCAL
       const analysed_results = await analyse(allItems, keywords);
       
       console.log("Ready, sending results back!");
