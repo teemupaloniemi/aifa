@@ -7,8 +7,20 @@ exports.compareResearchDescriptions = void 0;
 // Function to compare two descriptions
 const compareResearchDescriptions = (researchIdea, researchInstrument) => {
     // Convert both descriptions to lowercase and split them into arrays of words
-    const ideaWords = researchIdea.toLowerCase().split(/\s+/);
-    const instrumentWords = researchInstrument.toLowerCase().split(/\s+/);
+    let ideaWords = ["No research idea"];
+    let instrumentWords = ["NO instrument"];
+    if (researchIdea)
+        ideaWords = researchIdea.toLowerCase().split(/\s+/);
+    else {
+        console.log(ideaWords);
+        return 0;
+    }
+    if (researchInstrument)
+        instrumentWords = researchInstrument.toLowerCase().split(/\s+/);
+    else {
+        console.log(instrumentWords);
+        return 0;
+    }
     // Remove duplicates from both arrays
     const uniqueIdeaWords = Array.from(new Set(ideaWords));
     const uniqueInstrumentWords = Array.from(new Set(instrumentWords));

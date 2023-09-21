@@ -8,21 +8,21 @@ import FrameworkList from './FrameworkList';
 
 
 interface Metadata {
-  identifier: string[];
-  caName: string[];
-  es_ContentType: string[];
-  keywords: string[];
-  programmePeriod: string[];
-  esDA_IngestDate: string[];
-  type: string[];
-  title: string[];
-  esST_URL: string[];
-  esDA_QueueDate: string[];
-  esST_FileName: string[];
-  callIdentifier: string[];
-  frameworkProgramme: string[];
-  startDate: string[];
-  deadlineDate: string[];
+  identifier: string;
+  caName: string;
+  es_ContentType: string;
+  keywords: string;
+  programmePeriod: string;
+  esDA_IngestDate: string;
+  type: string;
+  title: string;
+  esST_URL: string;
+  esDA_QueueDate: string;
+  esST_FileName: string;
+  callIdentifier: string;
+  frameworkProgramme: string;
+  startDate: string;
+  deadlineDate: string;
 }
 
 interface DetailedData {
@@ -68,7 +68,18 @@ const frameworks: Framework[] = [
   { id: "43253967", name: "Renewable Energy Financing Mechanism (RENEWFM)", keywords: "Renewable Energy, Finance, Sustainability" },
   { id: "43254037", name: "European Solidarity Corps (ESC)", keywords: "Volunteering, Solidarity, Community Service" },
   { id: "43392145", name: "European Maritime, Fisheries and Aquaculture Fund (EMFAF)", keywords: "Maritime, Fisheries, Aquaculture, Sustainability" },
-  { id: "43254019", name: "European Social Fund + (ESF)", keywords: "Employment, Social Inclusion, Education" }
+  { id: "43254019", name: "European Social Fund + (ESF)", keywords: "Employment, Social Inclusion, Education" },
+  { id: "43298664", name: "Promotion of Agricultural Products (AGRIP)", keywords: "Agriculture, Farming, Production, Sustainability, Agri-tech" },
+  { id: "43251814", name: "Creative Europe Programme (CREA)", keywords: "Culture, Arts, Media, Audiovisual" },
+  { id: "43251842", name: "Union Anti-fraud Programme (EUAF)", keywords: "Anti-fraud, Security, Integrity, Governance" },
+  { id: "43252368", name: "Internal Security Fund (ISF)", keywords: "Security, Law Enforcement, Border Control" },
+  { id: "43298203", name: "Union Civil Protection Mechanism (UCPM)", keywords: "Civil Protection, Disaster Response, Emergency Management" },
+  { id: "43252517", name: "Social Prerogative and Specific Competencies Lines (SOCPL)", keywords: "Social Rights, Competencies, Governance" },
+  { id: "43251447", name: "Asylum, Migration and Integration Fund (AMIF)", keywords: "Asylum, Migration, Integration, Refugees" },
+  { id: "43251530", name: "Border Management and Visa Policy Instrument (BMVI)", keywords: "Borders, Visa Policy, Immigration, Security" },
+  { id: "43251882", name: "Support for information measures relating to the common agricultural policy (IMCAP)", keywords: "Agriculture, Information, Policy, Farming" },
+  { id: "44773133", name: "Information Measures for the EU Cohesion policy (IMREG)", keywords: "EU Cohesion, Information, Regional Development" },
+  { id: "45876777", name: "Neighbourhood, Development and International Cooperation Instrument Global Europe (NDICI)", keywords: "Neighbourhood, Development, International Cooperation, Global Relations" }
 ];
 
 const App: React.FC<AppProps> = ({ inputString }) => {
@@ -90,14 +101,22 @@ const App: React.FC<AppProps> = ({ inputString }) => {
 
   const groupByFramework = (tenders: DetailedData[]): Record<string, DetailedData[]> => {
     return tenders.reduce((acc, tender) => {
-      const frameworkId = tender.metadata.frameworkProgramme[0];
-      if (!acc[frameworkId]) {
-        acc[frameworkId] = [];
-      }
-      acc[frameworkId].push(tender);
-      return acc;
+        const match = tender.metadata.frameworkProgramme.match(/\d+/);
+        let frameworkId = match ? match[0] : tender.metadata.frameworkProgramme;
+
+        // Check if frameworkId is a string and looks like "{43108390}"
+        if (typeof frameworkId === 'string' && frameworkId.startsWith('{') && frameworkId.endsWith('}')) {
+            frameworkId = frameworkId.slice(1, -1);  // Remove the curly braces
+        }
+
+        if (!acc[frameworkId]) {
+            acc[frameworkId] = [];
+        }
+        acc[frameworkId].push(tender);
+        return acc;
     }, {} as Record<string, DetailedData[]>);
-  };
+};
+
 
 
   const fetchTenders = async () => {

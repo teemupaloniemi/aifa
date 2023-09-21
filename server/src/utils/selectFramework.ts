@@ -20,6 +20,15 @@ export async function selectFramework(researchIdea: string, frameworks: Framewor
     model: "gpt-3.5-turbo",
   });
   const match = chatCompletion_framework.choices[0].message.content?.match(/<ids>([\d,\s]+)<\/ids>/);
-  console.log("Frameworks selected:\n", match ? match[1].split(',') : ["43108390"]);
-  return match ? match[1].split(',') : ["43108390"];
+  const selectedIds = match ? match[1].split(',').map(id => id.trim()) : ["43108390"];
+
+  console.log("Frameworks selected:");
+  for (const id of selectedIds) {
+    const framework = frameworks.find(f => f.id === id);
+    if (framework) {
+      console.log(`ID: ${framework.id}, Name: ${framework.name}`);
+    }
+  }
+
+  return selectedIds;
 }

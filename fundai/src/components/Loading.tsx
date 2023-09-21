@@ -18,7 +18,7 @@ const Loading: React.FC = () => {
         };
     }, []);
 
-    return (<p>Loading... Time elapsed: {secondsElapsed} seconds (I can promise results in 200 seconds)</p>);
+    return (<p>Loading... Time elapsed: {secondsElapsed} seconds</p>);
 };
 
 export default Loading;

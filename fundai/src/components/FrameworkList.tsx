@@ -2,22 +2,22 @@ import React from 'react';
 import FrameworkItem from './FrameworkItem';
 
 interface Metadata {
-    identifier: string[];
-    caName: string[];
-    es_ContentType: string[];
-    keywords: string[];
-    programmePeriod: string[];
-    esDA_IngestDate: string[];
-    type: string[];
-    title: string[];
-    esST_URL: string[];
-    esDA_QueueDate: string[];
-    esST_FileName: string[];
-    callIdentifier: string[];
-    frameworkProgramme: string[];
-    startDate: string[];
-    deadlineDate: string[];
-}
+    identifier: string;
+    caName: string;
+    es_ContentType: string;
+    keywords: string;
+    programmePeriod: string;
+    esDA_IngestDate: string;
+    type: string;
+    title: string;
+    esST_URL: string;
+    esDA_QueueDate: string;
+    esST_FileName: string;
+    callIdentifier: string;
+    frameworkProgramme: string;
+    startDate: string;
+    deadlineDate: string;
+  }
 
 interface Framework {
   id: string;

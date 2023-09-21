@@ -2,22 +2,22 @@ import React, { useState } from 'react';
 import OpportunityItem from './OpportunityItem';
 
 interface Metadata {
-    identifier: string[];
-    caName: string[];
-    es_ContentType: string[];
-    keywords: string[];
-    programmePeriod: string[];
-    esDA_IngestDate: string[];
-    type: string[];
-    title: string[];
-    esST_URL: string[];
-    esDA_QueueDate: string[];
-    esST_FileName: string[];
-    callIdentifier: string[];
-    frameworkProgramme: string[];
-    startDate: string[];
-    deadlineDate: string[];
-}
+    identifier: string;
+    caName: string;
+    es_ContentType: string;
+    keywords: string;
+    programmePeriod: string;
+    esDA_IngestDate: string;
+    type: string;
+    title: string;
+    esST_URL: string;
+    esDA_QueueDate: string;
+    esST_FileName: string;
+    callIdentifier: string;
+    frameworkProgramme: string;
+    startDate: string;
+    deadlineDate: string;
+  }
 
 interface DetailedData {
     metadata: Metadata;
@@ -41,18 +41,21 @@ interface Props {
 }
 
 const FrameworkItem: React.FC<Props> = ({ framework, tenders, onItemSelect }) => {
+
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
+
+    if (!framework) return null;
 
     const toggleExpansion = () => {
         setIsExpanded(!isExpanded);
     }
 
-    const displayedTenders = isExpanded ? tenders : tenders.sort((a, b) => b.score - a.score).slice(0, 3);
+    const displayedTenders = isExpanded ? tenders : tenders.sort((a, b) => b.score - a.score).slice(0, 5);
 
     return (
         <div key={framework.id}>
             <h2 className="text-xl mb-2">
-                {framework.name} - {framework.keywords}
+                {framework && (framework.name ? framework.name : "No name found")} - {framework.keywords}
             </h2>
             <ul>
                 {displayedTenders.sort((a, b) => b.score - a.score).map((item, index) => (

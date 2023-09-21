@@ -1,6 +1,5 @@
 import axios from 'axios';
 import FormData from 'form-data';
-import puppeteer, { Browser } from 'puppeteer';
 
 export async function searchFromFrameworks(fitting_frameworks: string[] = ["43108390"]): Promise<any[]> {
     const allItems: any[] = [];
@@ -13,7 +12,7 @@ export async function searchFromFrameworks(fitting_frameworks: string[] = ["4310
             "bool": {
                 "must": [
                     { "terms": { "type": ["1", "2", "8"] } },
-                    { "terms": { "status": ["31094501"] } }, // "31094501" forthcoming, "31094502" open, "31094503" closed
+                    { "terms": { "status": ["31094501", "31094502","31094503"] } }, // "31094501" forthcoming, "31094502" open, "31094503" closed
                     { "term": { "programmePeriod": "2021 - 2027" } },
                     { "terms": { "frameworkProgramme": [framework.trim()] } }  // Set the frameworkProgramme field
                 ]

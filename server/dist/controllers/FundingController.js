@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FundingController = void 0;
-const search_1 = require("../utils/search");
+const searchDatabase_1 = require("../utils/searchDatabase");
 const translate_1 = require("../utils/translate");
 const keywords_1 = require("../utils/keywords");
 const selectFramework_1 = require("../utils/selectFramework");
@@ -35,17 +35,33 @@ const frameworks = [
     { id: "43253967", name: "Renewable Energy Financing Mechanism (RENEWFM)", keywords: "Renewable Energy, Finance, Sustainability" },
     { id: "43254037", name: "European Solidarity Corps (ESC)", keywords: "Volunteering, Solidarity, Community Service" },
     { id: "43392145", name: "European Maritime, Fisheries and Aquaculture Fund (EMFAF)", keywords: "Maritime, Fisheries, Aquaculture, Sustainability" },
-    { id: "43254019", name: "European Social Fund + (ESF)", keywords: "Employment, Social Inclusion, Education" }
+    { id: "43254019", name: "European Social Fund + (ESF)", keywords: "Employment, Social Inclusion, Education" },
+    { id: "43298664", name: "Promotion of Agricultural Products (AGRIP)", keywords: "Agriculture, Farming, Production, Sustainability, Agri-tech" },
+    { id: "43251814", name: "Creative Europe Programme (CREA)", keywords: "Culture, Arts, Media, Audiovisual" },
+    { id: "43251842", name: "Union Anti-fraud Programme (EUAF)", keywords: "Anti-fraud, Security, Integrity, Governance" },
+    { id: "43252368", name: "Internal Security Fund (ISF)", keywords: "Security, Law Enforcement, Border Control" },
+    { id: "43298203", name: "Union Civil Protection Mechanism (UCPM)", keywords: "Civil Protection, Disaster Response, Emergency Management" },
+    { id: "43252517", name: "Social Prerogative and Specific Competencies Lines (SOCPL)", keywords: "Social Rights, Competencies, Governance" },
+    { id: "43251447", name: "Asylum, Migration and Integration Fund (AMIF)", keywords: "Asylum, Migration, Integration, Refugees" },
+    { id: "43251530", name: "Border Management and Visa Policy Instrument (BMVI)", keywords: "Borders, Visa Policy, Immigration, Security" },
+    { id: "43251882", name: "Support for information measures relating to the common agricultural policy (IMCAP)", keywords: "Agriculture, Information, Policy, Farming" },
+    { id: "44773133", name: "Information Measures for the EU Cohesion policy (IMREG)", keywords: "EU Cohesion, Information, Regional Development" },
+    { id: "45876777", name: "Neighbourhood, Development and International Cooperation Instrument Global Europe (NDICI)", keywords: "Neighbourhood, Development, International Cooperation, Global Relations" }
 ];
 class FundingController {
     static async searchTenders(req, res) {
         let researchIdea = req.body.researchIdea;
         try {
             console.log('searchTenders: Preparing query data');
+            // AI
             const translatedResearchIdea = await (0, translate_1.translateText)(researchIdea);
+            // AI
             const fittingFrameworks = await (0, selectFramework_1.selectFramework)(translatedResearchIdea, frameworks);
-            const allItems = await (0, search_1.searchFromFrameworks)(fittingFrameworks);
+            // DB
+            const allItems = await (0, searchDatabase_1.searchFromDatabase)(fittingFrameworks);
+            // AI
             const keywords = await (0, keywords_1.getKeywords)(translatedResearchIdea);
+            // LOCAL
             const analysed_results = await (0, analyse_1.analyse)(allItems, keywords);
             console.log("Ready, sending results back!");
             res.json({ results: analysed_results });

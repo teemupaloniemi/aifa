@@ -47,7 +47,7 @@ This diagram provides a visual representation of the system's flow, highlighting
 
 ### Prerequisites
 - Ensure you have Node.js installed on your computer.
-- A `.env` file must be present in the `server` directory with the variable `OPENAI_API_KEY` set to your OpenAI API key.
+- A `.env` file must be present in the `server` directory with the `OPENAI_API_KEY` set to your OpenAI API key and `DB_PASSWORD` set to your database passsword.
 
 ### Steps
 
@@ -55,20 +55,28 @@ This diagram provides a visual representation of the system's flow, highlighting
 
 ```git clone <repo_url>```
 
-
 2. **Install Dependencies**
 - Navigate to the `fundai` folder and run:
   ```npm install```
 - Navigate to the `server` folder and run:
   ```npm install```
 
-3. **Build the Project**
+3. **Setup PostgreSQL Database**
+- Start your PostgreSQL service.
+- Create a new database for the project.
+- Update the database connection details in the server directory configuration.
+
+4. **Populate the Database** 
+- In the server directory, run:
+- ```node savedata.js```
+
+5. **Build the Project**
 - In the `fundai` folder, run:
   ```npm run build```
 - In the `server` folder, run:
   ```npm run build```
 
-4. **Start the Application**
+6. **Start the Application**
 - In the `fundai` folder, run:
   ```npm start```
 - In the `server` folder, run:
