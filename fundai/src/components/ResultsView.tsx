@@ -90,7 +90,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
 
 
   const handleItemClick = (item: DetailedData) => {
-    setSelectedItem(item); 
+    setSelectedItem(item);
   };
 
 
@@ -101,21 +101,21 @@ const App: React.FC<AppProps> = ({ inputString }) => {
 
   const groupByFramework = (tenders: DetailedData[]): Record<string, DetailedData[]> => {
     return tenders.reduce((acc, tender) => {
-        const match = tender.metadata.frameworkProgramme.match(/\d+/);
-        let frameworkId = match ? match[0] : tender.metadata.frameworkProgramme;
+      const match = tender.metadata.frameworkProgramme.match(/\d+/);
+      let frameworkId = match ? match[0] : tender.metadata.frameworkProgramme;
 
-        // Check if frameworkId is a string and looks like "{43108390}"
-        if (typeof frameworkId === 'string' && frameworkId.startsWith('{') && frameworkId.endsWith('}')) {
-            frameworkId = frameworkId.slice(1, -1);  // Remove the curly braces
-        }
+      // Check if frameworkId is a string and looks like "{43108390}"
+      if (typeof frameworkId === 'string' && frameworkId.startsWith('{') && frameworkId.endsWith('}')) {
+        frameworkId = frameworkId.slice(1, -1);  // Remove the curly braces
+      }
 
-        if (!acc[frameworkId]) {
-            acc[frameworkId] = [];
-        }
-        acc[frameworkId].push(tender);
-        return acc;
+      if (!acc[frameworkId]) {
+        acc[frameworkId] = [];
+      }
+      acc[frameworkId].push(tender);
+      return acc;
     }, {} as Record<string, DetailedData[]>);
-};
+  };
 
 
 
@@ -134,13 +134,13 @@ const App: React.FC<AppProps> = ({ inputString }) => {
 
   const groupedTenders = groupByFramework(tenderData);
 
-  
+
   return (
     <div>
       <Header />
       <ResearchIdeaInput inputValue={inputValue} onInputChange={setInputValue} onSearch={fetchTenders} />
       {isLoading ? (
-        <Loading/>
+        <Loading />
       ) : (
         <>
           {selectedItem ? (

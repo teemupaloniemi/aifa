@@ -11,7 +11,7 @@ export async function searchFromDatabase(fitting_frameworks: string[] = ["431083
     const client = new Client({
         host: 'localhost',
         port: 5432,
-        user: 'aifadmin',
+        user: 'postgres',
         password: process.env.DB_PASSWORD,
         database: 'aifabase',
     });

@@ -8,15 +8,15 @@ exports.compareResearchDescriptions = void 0;
 const compareResearchDescriptions = (researchIdea, researchInstrument) => {
     // Convert both descriptions to lowercase and split them into arrays of words
     let ideaWords = ["No research idea"];
-    let instrumentWords = ["NO instrument"];
+    let instrumentWords = ["No instrument"];
     if (researchIdea)
-        ideaWords = researchIdea.toLowerCase().split(/\s+/);
+        ideaWords = researchIdea.toLowerCase().replace(',', '').split(/\s+/);
     else {
         console.log(ideaWords);
         return 0;
     }
     if (researchInstrument)
-        instrumentWords = researchInstrument.toLowerCase().split(/\s+/);
+        instrumentWords = researchInstrument.toLowerCase().replace(',', '').split(/\s+/);
     else {
         console.log(instrumentWords);
         return 0;
