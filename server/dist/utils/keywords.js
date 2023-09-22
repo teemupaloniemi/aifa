@@ -14,7 +14,7 @@ async function getKeywords(researchIdea) {
     var _a;
     console.log("\nGenerating keywords...");
     const chatCompletion_keywords = await openai.chat.completions.create({
-        messages: [{ role: "user", content: `Give five to ten single-word keywords that thematically best describe the following research, developement or innovation idea (just keywords no numbers or commas). Give the keywords in a xml tag <keywords>insert keywords here</keywords> This is the research idea: ${researchIdea}` }],
+        messages: [{ role: "user", content: `Give ten to fifteen single-word keywords that thematically best describe the following research, developement or innovation idea (just keywords no numbers or commas). Give the keywords in a xml tag <keywords>insert keywords here</keywords> This is the research idea: ${researchIdea}` }],
         model: "gpt-3.5-turbo",
     });
     // Extracting the content between the <keywords> tags

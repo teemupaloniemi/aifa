@@ -16,7 +16,7 @@ function App() {
   };
 
   return (
-    <div className="lg:mx-80 md:mx-40 my-10">
+    <div className="lg:mx-20 md:mx-10 m-5">
       {!showScrapeView ? (
           <ProfileView handleSubmit={handleSubmit}/>
       ): (

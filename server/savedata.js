@@ -91,61 +91,28 @@ async function searchFromFrameworks(fitting_frameworks) {
     return allItems;
 }
 
+
 const scrapeContent = async (url, browser) => {
-    
-    if (!url) {
-        return "No url provided!";
-    }
-
     try {
-
         const page = await browser.newPage();
-        page.setDefaultNavigationTimeout(120000);
         await page.goto(url);
-        await page.waitForSelector('.addListStyling p', {timeout: 120000});
 
-        // Fetch only the paragraphs inside the scrapedContent
-        const content = await page.$$eval('.addListStyling', elements => {
-            return elements.map(el => {
-                // Extract the label from the ux-panel attribute
-                const label = el.closest('ux-panel')?.getAttribute('label') || 'Unknown';
-                const spanText = el.querySelector('.topicdescriptionkind')?.textContent || '';
+        // Wait for the iframe to load
+        const iframeSelector = 'body > app-root > ng-component > eui-app > div > div > mywp-route-element-loader > mywp-element-loader > div > div > iframe';
+        await page.waitForSelector(iframeSelector, {timeout: 300000});
 
-                let combinedText = `${label} - ${spanText}:\n\n`;
+        // Get the iframe's content frame
+        const iframeElement = await page.$(iframeSelector);
+        const iframeContent = await iframeElement.contentFrame();
 
-                // Process child nodes in order
-                el.childNodes.forEach(node => {
-                    if (node instanceof Element) {
-                        if (node.nodeName === 'P') {
-                            combinedText += node.textContent + '\n\n';
-                        } else if (node.nodeName === 'UL') {
-                            combinedText += Array.from(node.querySelectorAll('li')).map(li => `• ${li.textContent?.trim()}`).join('\n') + '\n\n';
-                        } else if (node.nodeName === 'TABLE') {
-                            const headerRows = Array.from(node.querySelectorAll('thead tr')).map(row => {
-                                return Array.from(row.querySelectorAll('td, th')).map(cell => {
-                                    const pTexts = Array.from(cell.querySelectorAll('p')).map(p => p.textContent?.trim());
-                                    return pTexts.length > 0 ? pTexts.join(' ') : cell.textContent?.trim();
-                                }).join(' - ');
-                            }).join('\n');
-                            const bodyRows = Array.from(node.querySelectorAll('tbody tr')).map(row => {
-                                return Array.from(row.querySelectorAll('td, th')).map(cell => {
-                                    const pTexts = Array.from(cell.querySelectorAll('p')).map(p => p.textContent?.trim());
-                                    return pTexts.length > 0 ? pTexts.join(' ') : cell.textContent?.trim();
-                                }).join(' - ');
-                            }).join('\n');
-                            combinedText += `${headerRows}\n${bodyRows}\n\n`;
-                        }
-                    }
-                });
+        // Wait for a specific element inside the iframe
+        await iframeContent.waitForSelector('eui-page.eui-page--with-columns', {timeout: 300000});
 
-                return combinedText.trim();
-            });
-        });
+        // Now you can use iframeContent just like you'd use the main page object to scrape content
+        const iframeText = await iframeContent.evaluate(() => document.body.innerText);
 
-        //console.log("Closing the browser...");
-        await page.close();
-
-        return content.join("\n\n");
+        console.log("Iframe text length:", iframeText.length);
+        return iframeText;
 
     } catch (error) {
         console.log("Error:", error.message);
@@ -153,10 +120,15 @@ const scrapeContent = async (url, browser) => {
     }
 };
 
+
+
+
+
 async function processBatch(items, start, end, browser) {
     const batch = items.slice(start, end);
     return await Promise.all(batch.map(async (item) => {
         const identifier = item.metadata.identifier[0];
+        console.log(identifier.toLowerCase())
         const url = `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${identifier.toLowerCase()}`;
         const scrapedContent = await scrapeContent(url, browser);
         return {
@@ -258,22 +230,55 @@ const saveData = async (dataList) => {
     
         // Insert into metadata table using parameterized query
         const metadataQuery = `
-            INSERT INTO metadata(identifier, caName, es_ContentType, keywords, programmePeriod, esDA_IngestDate, type, title, esST_URL, esDA_QueueDate, esST_FileName, callIdentifier, frameworkProgramme, startDate, deadlineDate)
-            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-            RETURNING id;
-        `;
+        INSERT INTO metadata(identifier, caName, es_ContentType, keywords, programmePeriod, esDA_IngestDate, type, title, esST_URL, esDA_QueueDate, esST_FileName, callIdentifier, frameworkProgramme, startDate, deadlineDate)
+        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        ON CONFLICT (identifier) 
+        DO UPDATE SET 
+            caName = EXCLUDED.caName,
+            es_ContentType = EXCLUDED.es_ContentType,
+            keywords = EXCLUDED.keywords,
+            programmePeriod = EXCLUDED.programmePeriod,
+            esDA_IngestDate = EXCLUDED.esDA_IngestDate,
+            type = EXCLUDED.type,
+            title = EXCLUDED.title,
+            esST_URL = EXCLUDED.esST_URL,
+            esDA_QueueDate = EXCLUDED.esDA_QueueDate,
+            esST_FileName = EXCLUDED.esST_FileName,
+            callIdentifier = EXCLUDED.callIdentifier,
+            frameworkProgramme = EXCLUDED.frameworkProgramme,
+            startDate = EXCLUDED.startDate,
+            deadlineDate = EXCLUDED.deadlineDate
+        RETURNING id;`;    
         const metadataValues = [identifier, caName, es_ContentType, keywords, programmePeriod, esDA_IngestDate, type, title, esST_URL, esDA_QueueDate, esST_FileName, callIdentifier, frameworkProgramme, startDate, deadlineDate];
         const metadataRes = await client.query(metadataQuery, metadataValues);
         const metadataId = metadataRes.rows[0].id;
+
+        if (metadataRes.rowCount === 0) {
+            console.log(`Conflict detected for identifier ${identifier}. No update needed.`);
+        } else {
+            console.log(`Inserted or updated identifier ${identifier}.`);
+        }
     
-        // Insert into detaileddata table using parameterized query
         const detailedDataQuery = `
-            INSERT INTO detaileddata(metadata_id, scrapedContent, title, language, content)
-            VALUES($1, $2, $3, $4, $5);
-        `;
+        INSERT INTO detaileddata(metadata_id, scrapedContent, title, language, content)
+        VALUES($1, $2, $3, $4, $5)
+        ON CONFLICT (metadata_id) 
+        DO UPDATE SET 
+            scrapedContent = EXCLUDED.scrapedContent,
+            title = EXCLUDED.title,
+            language = EXCLUDED.language,
+            content = EXCLUDED.content;`;
         const detailedDataValues = [metadataId, data.scrapedContent || '', data.title || '', data.language || '', data.content || ''];
-        await client.query(detailedDataQuery, detailedDataValues);
+        const detailedDataRes = await client.query(detailedDataQuery, detailedDataValues);
+
+        if (detailedDataRes.rowCount === 0) {
+            console.log(`Conflict detected for metadata_id ${metadataId}. No update needed.`);
+        } else {
+            console.log(`Inserted or updated metadata_id ${metadataId}.`);
+        }
     }
+
+    return dataList.length;
 };
 
 // Create an instance of the database_f class
