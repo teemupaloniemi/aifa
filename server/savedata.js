@@ -71,7 +71,7 @@ async function searchFromFrameworks(fitting_frameworks) {
         console.log('\nsearchTenders: Sending request to API:', framework.trim());
 
         const response = await axios.post(
-            'https://api.tech.ec.europa.eu/search-api/prod/rest/search?apiKey=SEDIA&text=*&pageSize=500&pageNumber=1',
+            'https://api.tech.ec.europa.eu/search-api/prod/rest/search?apiKey=SEDIA&text=*&pageSize=20&pageNumber=1',
             formData,
             {
                 headers: {
@@ -248,10 +248,10 @@ const saveData = async (dataList) => {
             frameworkProgramme = EXCLUDED.frameworkProgramme,
             startDate = EXCLUDED.startDate,
             deadlineDate = EXCLUDED.deadlineDate
-        RETURNING id;`;    
+        RETURNING identifier;`;    
         const metadataValues = [identifier, caName, es_ContentType, keywords, programmePeriod, esDA_IngestDate, type, title, esST_URL, esDA_QueueDate, esST_FileName, callIdentifier, frameworkProgramme, startDate, deadlineDate];
         const metadataRes = await client.query(metadataQuery, metadataValues);
-        const metadataId = metadataRes.rows[0].id;
+        const metadataId = metadataRes.rows[0].identifier;
 
         if (metadataRes.rowCount === 0) {
             console.log(`Conflict detected for identifier ${identifier}. No update needed.`);

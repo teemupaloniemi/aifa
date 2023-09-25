@@ -35,6 +35,40 @@ The R&D Funding Instruments Recommendation Engine is designed to streamline the 
 
 This diagram provides a visual representation of the system's flow, highlighting the interactions between the user, the application interface, the funding controller, the frameworks database, and the LLM model.
 
+# Llama Model Server Setup Guide for Inference
+
+Before you can use the Flask app for model inference, you need to set up the environment for serving the model. The process involves obtaining the model, positioning it in the proper directory, and configuring any necessary dependencies.
+
+## Steps to Set Up Llama Model Server:
+
+1. **Prepare the Model Directory**:
+    - Move to a directory named `llm` in your repository where you'll serve the model.
+
+2. **Clone and Build the llama.cpp Repository**:
+    - Clone the `llama.cpp` repository from [https://github.com/ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp).
+    - Follow the build instructions provided in the repository guide to prepare the environment. (run `make -j`)
+
+3. **Download and Position the Model**:
+    - Acquire the model you're using in the GGUF format.
+    - Add your GGUF model to the `models` folder of the cloned repository.
+    - Add the name of your model in the api.py file.
+
+4. **Running the Flask App**:
+    - Inside your `llm` directory, you'll find the Python script `api.py` which contains the Flask app that interfaces with the model.
+    - Execute the command: `python api.py` to initiate the Flask app.
+    - This command starts a development server on `localhost:8000`.
+
+5. **For Model Inference**:
+    - With the Flask server active, direct a POST request to `localhost:8000/query` to interact with the model and get inference results.
+
+6. **Dependencies for the LLM Directory**:
+    - To establish and operate the model server, the following tools and packages are required:
+        - `make`: for building the `llama.cpp` repository.
+        - `python`: for running the Flask app.
+        - Any additional dependencies specified in the `llama.cpp` repository '
+        - Install Flask and termcolor for `api.py` with `pip install Flask termcolor`
+
+Once these steps are complete, your Flask app will be set to receive and process prompts, returning model-generated responses. Now you can move to the next section.
 
 ## Usage
 

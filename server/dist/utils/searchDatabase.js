@@ -13,7 +13,7 @@ async function searchFromDatabase(fitting_frameworks = ["43108390"]) {
     const client = new pg_1.Client({
         host: 'localhost',
         port: 5432,
-        user: 'postgres',
+        user: 'aifadmin',
         password: process.env.DB_PASSWORD,
         database: 'aifabase',
     });

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { searchFromDatabase } from '../utils/searchDatabase';
 import { translateText } from '../utils/translate';
-import { getKeywords } from '../utils/keywords';
+import { getKeywords } from '../utils/keywordsLocal';
 import { selectFramework } from '../utils/selectFramework';
 import { analyse } from '../utils/analyse';
 import dotenv from 'dotenv';

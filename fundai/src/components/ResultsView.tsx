@@ -122,7 +122,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
   const fetchTenders = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`http://localhost:5000/api/fundingTenders/searchTenders`, { researchIdea: inputValue });
+      const response = await axios.post(`http://localhost:5001/api/fundingTenders/searchTenders`, { researchIdea: inputValue });
       setTenderData(response.data.results);
       if (response.data.results.length === 0) alert("No Results Found :(")
     } catch (error) {

@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FundingController = void 0;
 const searchDatabase_1 = require("../utils/searchDatabase");
 const translate_1 = require("../utils/translate");
-const keywords_1 = require("../utils/keywords");
+const keywordsLocal_1 = require("../utils/keywordsLocal");
 const selectFramework_1 = require("../utils/selectFramework");
 const analyse_1 = require("../utils/analyse");
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -60,7 +60,7 @@ class FundingController {
             // DB
             const allItems = await (0, searchDatabase_1.searchFromDatabase)(fittingFrameworks);
             // AI
-            const keywords = await (0, keywords_1.getKeywords)(translatedResearchIdea);
+            const keywords = await (0, keywordsLocal_1.getKeywords)(translatedResearchIdea);
             // LOCAL
             const analysed_results = await (0, analyse_1.analyse)(allItems, keywords);
             console.log("Ready, sending results back!");

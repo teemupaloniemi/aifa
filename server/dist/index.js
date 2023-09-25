@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const FundingRoutes_1 = __importDefault(require("./routes/FundingRoutes"));
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
-const PORT = 5000;
+const PORT = 5001;
 const app = (0, express_1.default)();
 // CORS configuration
 const corsOptions = {
