@@ -5,9 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FundingController = void 0;
 const searchDatabase_1 = require("../utils/searchDatabase");
-const translate_1 = require("../utils/translate");
 const keywordsLocal_1 = require("../utils/keywordsLocal");
-const selectFramework_1 = require("../utils/selectFramework");
+const selectFrameworkLocal_1 = require("../utils/selectFrameworkLocal");
 const analyse_1 = require("../utils/analyse");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
@@ -54,9 +53,9 @@ class FundingController {
         try {
             console.log('searchTenders: Preparing query data');
             // AI
-            const translatedResearchIdea = await (0, translate_1.translateText)(researchIdea);
+            const translatedResearchIdea = researchIdea; //await translateText(researchIdea); 
             // AI
-            const fittingFrameworks = await (0, selectFramework_1.selectFramework)(translatedResearchIdea, frameworks);
+            const fittingFrameworks = await (0, selectFrameworkLocal_1.selectFramework)(translatedResearchIdea, frameworks);
             // DB
             const allItems = await (0, searchDatabase_1.searchFromDatabase)(fittingFrameworks);
             // AI

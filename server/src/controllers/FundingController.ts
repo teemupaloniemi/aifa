@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { searchFromDatabase } from '../utils/searchDatabase';
 import { translateText } from '../utils/translate';
 import { getKeywords } from '../utils/keywordsLocal';
-import { selectFramework } from '../utils/selectFramework';
+import { selectFramework } from '../utils/selectFrameworkLocal';
 import { analyse } from '../utils/analyse';
 import dotenv from 'dotenv';
 
@@ -61,7 +61,7 @@ class FundingController {
       console.log('searchTenders: Preparing query data');
 
       // AI
-      const translatedResearchIdea = await translateText(researchIdea); 
+      const translatedResearchIdea = researchIdea; //await translateText(researchIdea); 
       // AI
       const fittingFrameworks = await selectFramework(translatedResearchIdea, frameworks);
       // DB
