@@ -52,12 +52,12 @@ function formatDateToYearMonth(dateString: string): string {
 
 const OpportunityItem: React.FC<Props> = ({ item, onSelect }) => (
   <li
-    className={item.score > 70 ? 'border-2 m-2 py-2 px-4 rounded-md sm:hover:bg-primary-100 sm:hover:shadow-lg border-primary-600' : 'border-2 m-2 py-2 px-4 border-primary-500 rounded-md sm:hover:bg-primary-100 sm:hover:shadow-lg'}
+    className={'text-sm p-1 mb-2 rounded-md sm:hover:underline sm:hover:cursor-pointer'}
     onClick={() => onSelect(item)}
   >
     <p>
       {item.content} 
-      <b>
+      <b className={item.score > 70 ? 'text-primary-700' : ''}>
         {" "+Math.round(item.score)}%{" "}
       </b> 
       -- {formatDateToYearMonth(item.metadata.deadlineDate)}

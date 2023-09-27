@@ -52,16 +52,16 @@ function formatDateToYearMonth(dateString: string): string {
 
 const DetailedView: React.FC<Props> = ({ selectedItem, onClose }) => (
     <div className='flex flex-col items-start m-2 py-2 px-4'>
-        <button className='border-2 my-4 py-2 px-4 border-primary-500 rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={onClose}>Close</button>
-        <div className="text-xl mb-4">{selectedItem.metadata.title} --- <strong>Score: {Math.round(selectedItem.score)}</strong></div>
+        <button className='border-2 my-2 py-2 px-4 border-primary-500 rounded-md sm:hover:shadow-lg sm:hover:bg-primary-100' onClick={onClose}>Close</button>
+        <div className="text-lg mb-4">{selectedItem.content} - <strong>Score: {Math.round(selectedItem.score)}</strong></div>
         <div>
             <p><strong>Deadline:</strong></p>
-            <p className="mt-4">{formatDateToYearMonth(selectedItem.metadata.deadlineDate)}</p>
-            <p><a href={`https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${selectedItem.metadata.identifier.toLowerCase()}`} className="md:hover:underline text-primary-500">https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/{selectedItem.metadata.identifier.toLowerCase()}</a></p>
+            <p className="mt-4 text-sm">{formatDateToYearMonth(selectedItem.metadata.deadlineDate)}</p>
+            <p className="text-sm"><a href={`https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${selectedItem.metadata.identifier.toLowerCase()}`} className="md:hover:underline text-primary-500">https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/{selectedItem.metadata.identifier.toLowerCase()}</a></p>
         </div>
         <div className="w-full h-96 mt-4">
             <p><strong>Description:</strong></p>
-            <textarea readOnly className="w-full h-full mt-4">{selectedItem.scrapedContent}</textarea>
+            <textarea readOnly className="w-full h-full mt-4 mb-16 text-sm">{selectedItem.scrapedContent}</textarea>
         </div>
     </div>
 );

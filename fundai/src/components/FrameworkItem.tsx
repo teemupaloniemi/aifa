@@ -53,8 +53,8 @@ const FrameworkItem: React.FC<Props> = ({ framework, tenders, onItemSelect }) =>
     const displayedTenders = isExpanded ? tenders : tenders.sort((a, b) => b.score - a.score).slice(0, 5);
 
     return (
-        <div key={framework.id}>
-            <h2 className="text-xl mb-2">
+        <div key={framework.id} className="my-4 border-b-2">
+            <h2 className=" mb-2">
                 {framework && (framework.name ? framework.name : "No name found")} - {framework.keywords}
             </h2>
             <ul>
