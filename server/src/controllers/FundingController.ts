@@ -60,13 +60,13 @@ class FundingController {
     try {
       console.log('searchTenders: Preparing query data');
 
-      // AI
+      // NOT USED NOW
       const translatedResearchIdea = researchIdea; //await translateText(researchIdea); 
-      // AI
+      // LOCAL
       const fittingFrameworks = await selectFramework(translatedResearchIdea, frameworks);
       // DB
       const allItems = await searchFromDatabase(fittingFrameworks);
-      // AI
+      // LOCAL
       const keywords = await getKeywords(translatedResearchIdea);
       // LOCAL
       const analysed_results = await analyse(allItems, keywords);
