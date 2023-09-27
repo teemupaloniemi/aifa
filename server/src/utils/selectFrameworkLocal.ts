@@ -29,15 +29,29 @@ export async function selectFramework(researchIdea: string, frameworks: Framewor
 
     const match  = matches.map(match => match[1]).join(', ');  
     
-    const selectedIds = match ? match.split(',').map((id: string) => id.replace(/[^0-9]/g, '').trim()) : ["43108390"];
+    const selectedIds = match 
+    ? match.split(',')
+           .map((id: string) => id.replace(/[^0-9]/g, '').trim())
+           .flatMap((id: string) => {
+               let specialIdMatch = id.match(/111111/);
+               let otherIds = id.replace(/111111/g, '').match(/\d{1,8}/g) || [];
 
-    console.log("Frameworks selected:");
+               if (specialIdMatch) {
+                   return [specialIdMatch[0], ...otherIds];
+               } else {
+                   return otherIds;
+               }
+           })
+    : ["43108390"];
+
+    console.log("Frameworks selected:\n");
     for (const id of selectedIds) {
         const framework = frameworks.find(f => f.id === id);
         if (framework) {
-            console.log(`ID: ${framework.id}, Name: ${framework.name}`);
+            console.log("\u001b[35m" + `ID: ${framework.id}, Name: ${framework.name}` + "\x1B[0m");
         }
     }
+    
 
     return selectedIds;
 }
