@@ -71,7 +71,7 @@ async function searchFromFrameworks(fitting_frameworks) {
         console.log('\nsearchTenders: Sending request to API:', framework.trim());
 
         const response = await axios.post(
-            'https://api.tech.ec.europa.eu/search-api/prod/rest/search?apiKey=SEDIA&text=*&pageSize=20&pageNumber=1',
+            'https://api.tech.ec.europa.eu/search-api/prod/rest/search?apiKey=SEDIA&text=*&pageSize=600&pageNumber=1',
             formData,
             {
                 headers: {

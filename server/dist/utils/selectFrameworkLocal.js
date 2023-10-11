@@ -12,8 +12,10 @@ async function selectFramework(researchIdea, frameworks) {
     // Convert frameworks to condensed id-name pairs
     const condensedFrameworks = frameworks.map(f => `${f.id}:${f.name}`).join(',');
     // Use axios to send a POST request to our LLM API endpoint
-    const response = await axios_1.default.post('http://localhost:8000/query', {
+    const response = await axios_1.default.post('http://147.189.192.103/query', {
         prompt: `For idea ${researchIdea}, which European Commission funds from [${condensedFrameworks}] are best suitable? Reply with tags like this <ids>suitable ids here</ids>. Best fitting fund ids are: <ids>`
+    }, {
+        timeout: 300000 // 5 minutes timeout
     });
     const result = response.data.response.replace(`For idea ${researchIdea}, which European Commission funds from [${condensedFrameworks}] are best suitable? Reply with tags like this <ids>suitable ids here</ids>. Best fitting fund ids are:`, "");
     console.log("\n\x1B[34m", result, "\x1B[0m\n");

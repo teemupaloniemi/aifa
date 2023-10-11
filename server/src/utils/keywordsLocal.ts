@@ -7,8 +7,10 @@ export async function getKeywords(researchIdea: string): Promise<string> {
   console.log("\nGenerating keywords...")
 
   try {
-    const response = await axios.post('http://localhost:8000/query', { 
+    const response = await axios.post('http://IP/query', { 
       prompt: `Provide keywords for R&D: ${researchIdea} in tags like this <keywords>keywords go in here</keywords>. Keywords are: <keywords>`
+    }, {
+      timeout: 300000 // 5 minutes timeout
     });
 
     const result = response.data.response.replace(`Provide keywords for R&D: ${researchIdea} in tags like this <keywords>keywords go in here</keywords>. Keywords are:`,"");

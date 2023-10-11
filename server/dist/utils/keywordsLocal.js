@@ -10,8 +10,10 @@ dotenv_1.default.config();
 async function getKeywords(researchIdea) {
     console.log("\nGenerating keywords...");
     try {
-        const response = await axios_1.default.post('http://localhost:8000/query', {
+        const response = await axios_1.default.post('http://147.189.192.103/query', {
             prompt: `Provide keywords for R&D: ${researchIdea} in tags like this <keywords>keywords go in here</keywords>. Keywords are: <keywords>`
+        }, {
+            timeout: 300000 // 5 minutes timeout
         });
         const result = response.data.response.replace(`Provide keywords for R&D: ${researchIdea} in tags like this <keywords>keywords go in here</keywords>. Keywords are:`, "");
         console.log("\n\x1B[34m", result, "\x1B[0m\n");

@@ -15,9 +15,10 @@ function generate(prompt) {
             reject("Invalid prompt provided.");
             return;
         }
-        const cmd = ['./llama.cpp/main', '-c', '2048', '-m', './llama.cpp/models/llama-2-7b-chat.Q4_K_M.gguf', '-p', `${prompt}`, '-e'];
+        const cmd = ['./llama.cpp/main', '-c', '8192', '-m', './llama.cpp/models/llama-2-7b-32k-instruct.Q8_0.gguf', '-p', `"${prompt}"`, '-n', '400', '-e'];
         const mainCommand = cmd.shift();
-        console.log("Running command:", mainCommand + " " + cmd);
+        console.log("\n\nRunning command:", cmd.join(" "));
+        console.log("\n\n\n");
         if (!mainCommand) {
             reject("Main command not found.");
             return;
@@ -35,15 +36,15 @@ function generate(prompt) {
             reject(error.message);
         });
         process.on('exit', (code) => {
-            if (code !== 0) {
-                console.error(`Process exited with code: ${code}`);
-                //console.error("Stderr output:", stderrData);
-                reject(`Process exited with code: ${code}. Stderr: ${stderrData}`);
-                return;
-            }
-            if (stderrData) {
-                console.warn("Stderr output (non-fatal):", stderrData);
-            }
+            //  if (code !== 0) {
+            //    console.error(`Process exited with code: ${code}`);
+            //console.error("Stderr output:", stderrData);
+            // reject(`Process exited with code: ${code}. Stderr: ${stderrData}`);
+            //  return;
+            //}
+            //if (stderrData) {
+            //    console.warn("Stderr output (non-fatal):", stderrData);
+            //}
             console.log("Process completed. Final result:", result);
             resolve(result);
         });

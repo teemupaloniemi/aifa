@@ -52,13 +52,13 @@ class FundingController {
         let researchIdea = req.body.researchIdea;
         try {
             console.log('searchTenders: Preparing query data');
-            // AI
+            // NOT USED NOW
             const translatedResearchIdea = researchIdea; //await translateText(researchIdea); 
-            // AI
+            // LOCAL
             const fittingFrameworks = await (0, selectFrameworkLocal_1.selectFramework)(translatedResearchIdea, frameworks);
             // DB
             const allItems = await (0, searchDatabase_1.searchFromDatabase)(fittingFrameworks);
-            // AI
+            // LOCAL
             const keywords = await (0, keywordsLocal_1.getKeywords)(translatedResearchIdea);
             // LOCAL
             const analysed_results = await (0, analyse_1.analyse)(allItems, keywords);
