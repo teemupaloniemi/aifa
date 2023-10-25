@@ -24,7 +24,8 @@ export async function getKeywords(researchIdea: string): Promise<string> {
     const keywordMatch = matches.map(match => match[1]).join(', ');    
     
     // If keywords are found, remove any numbers or commas and return the result
-    let keywords = keywordMatch ? keywordMatch.replace(/\b\d+\.?\b/g, "").replace(/,/g, '') : "NO-KEYWORDS-GENERATED";
+    let keywords = keywordMatch ? keywordMatch.split(',').map(keyword => keyword.trim().replace(/"/g, '')).join(', ') : "NO-KEYWORDS-GENERATED";
+    //let keywords = keywordMatch ? keywordMatch.replace(/\b\d+\.?\b/g, "").replace(/,/g, '').replace('"', '') : "NO-KEYWORDS-GENERATED";
     if (keywords.length === 0) keywords = "NO-KEYWORDS-GENERATED";
     console.log("Keywords generated:\n")
     console.log("\u001b[35m" + keywords + "\u001b[0m");
