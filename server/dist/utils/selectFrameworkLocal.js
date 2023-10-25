@@ -11,13 +11,14 @@ async function selectFramework(researchIdea, frameworks) {
     console.log("\nSelecting frameworks...");
     // Convert frameworks to condensed id-name pairs
     const condensedFrameworks = frameworks.map(f => `${f.id}:${f.name}`).join(',');
+    const ip = process.env.LLM_IP;
     // Use axios to send a POST request to our LLM API endpoint
-    const response = await axios_1.default.post('http://147.189.192.103/query', {
-        prompt: `For idea ${researchIdea}, which European Commission funds from [${condensedFrameworks}] are best suitable? Reply with tags like this <ids>suitable ids here</ids>. Best fitting fund ids are: <ids>`
+    const response = await axios_1.default.post(`http://${ip}/query`, {
+        prompt: `For the following idea <idea>${researchIdea}</idea>, which European Commission funds from <frameworks>${condensedFrameworks}</frameworks> are propably best suitable? Reply with tags like this <ids>suitable ids here</ids>. Best fitting fund ids are: <ids> `
     }, {
         timeout: 300000 // 5 minutes timeout
     });
-    const result = response.data.response.replace(`For idea ${researchIdea}, which European Commission funds from [${condensedFrameworks}] are best suitable? Reply with tags like this <ids>suitable ids here</ids>. Best fitting fund ids are:`, "");
+    const result = response.data.response.replace(`For the following idea <idea>${researchIdea}</idea>, which European Commission funds from <frameworks>${condensedFrameworks}</frameworks> are propably best suitable? Reply with tags like this <ids>suitable ids here</ids>. Best fitting fund ids are:`, "");
     console.log("\n\x1B[34m", result, "\x1B[0m\n");
     // Parse the response
     const matches = [...result.matchAll(/<ids>(.*?)<\/ids>/g)];

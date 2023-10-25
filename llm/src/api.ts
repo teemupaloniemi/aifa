@@ -15,20 +15,22 @@ function generate(prompt: string): Promise<string> {
             return;
         }
 
-
-        const cmd = ['./llama.cpp/main', '-c', '8192', '-m', './llama.cpp/models/llama-2-7b-32k-instruct.Q8_0.gguf', '-p', `"${prompt}"`,'-n','400','-e'];
+        // falcon-180B 
+        //const cmd = ['./llama.cpp/main', '-c', '4096', '-m', '/mnt/vol_b/falcon-180b-chat.Q4_K_M.gguf', '-p', `"${prompt}"`,'-ngl','100']; 
+        // llama-7B
+        const cmd = ['./llama.cpp/main', '-c', '4096', '-m', './llama.cpp/models/llama-2-7b-chat.Q4_K_S.gguf', '-p', `"${prompt}"`,'-ngl','100'];
         const mainCommand = cmd.shift();
-        
+
         console.log("\n\nRunning command:", cmd.join(" "));
-	console.log("\n\n\n")
-	
+        console.log("\n\n\n")
+
         if (!mainCommand) {
             reject("Main command not found.");
             return;
         }
-        
+
         const process = spawn(mainCommand, cmd);
-        
+
         let result = '';
         let stderrData = '';
 
@@ -66,10 +68,10 @@ app.post('/query', async (req, res) => {
     try {
         const prompt = req.body.prompt;
         console.log("\n\n\n\n\n\n\nReceived prompt:", prompt);
-        
+
         const response = await generate(prompt);
         console.log("Generated response:", response);
-        
+
         res.json({ response });
     } catch (error) {
         console.error("Error during query processing:", error);
