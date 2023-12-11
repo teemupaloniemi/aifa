@@ -1,24 +1,14 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.selectFramework = void 0;
-const axios_1 = __importDefault(require("axios")); // We'll use axios to make HTTP requests
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
+const generate_1 = require("./generate");
 async function selectFramework(researchIdea, frameworks) {
     console.log("\nSelecting frameworks...");
     // Convert frameworks to condensed id-name pairs
     const condensedFrameworks = frameworks.map(f => `${f.id}:${f.name}`).join(',');
-    const ip = process.env.LLM_IP;
-    // Use axios to send a POST request to our LLM API endpoint
-    const response = await axios_1.default.post(`http://${ip}/query`, {
-        prompt: `For the following idea <idea>${researchIdea}</idea>, which European Commission funds (IDs) from <frameworks>${condensedFrameworks}</frameworks> are propably best suitable? Reply with tags like this <ids>suitable IDs here like 12345</ids>. Best fitting fund ids are: <ids> `
-    }, {
-        timeout: 300000 // 5 minutes timeout
-    });
-    const result = response.data.response.replace(`For the following idea <idea>${researchIdea}</idea>, which European Commission funds (IDs) from <frameworks>${condensedFrameworks}</frameworks> are propably best suitable? Reply with tags like this <ids>suitable IDs here like 12345</ids>. Best fitting fund ids are:`, "");
+    let prompt = `For the following idea <idea>${researchIdea}</idea>, which European Commission funds (IDs) from <frameworks>${condensedFrameworks}</frameworks> are propably best suitable? Reply with tags like this <ids>suitable IDs here like 12345</ids>. Best fitting fund ids are: <ids> `;
+    let result = await (0, generate_1.generate)(prompt);
+    result = "<ids>" + result;
     console.log("\n\x1B[34m", result, "\x1B[0m\n");
     // Parse the response
     const matches = [...result.matchAll(/<ids>(.*?)<\/ids>/g)];

@@ -14,7 +14,7 @@ async function searchFromDatabase(fitting_frameworks = ["43108390"]) {
         host: 'localhost',
         port: 5432,
         user: 'aifadmin',
-        password: process.env.DB_PASSWORD,
+        password: 'binaryblaze',
         database: 'aifabase',
     });
     // Connect to the database
@@ -25,7 +25,7 @@ async function searchFromDatabase(fitting_frameworks = ["43108390"]) {
         // Construct the SQL query to join detaileddata and metadata tables
         const query = `
             SELECT * FROM detaileddata d
-            JOIN metadata m ON d.metadata_id = m.id
+            JOIN metadata m ON d.metadata_id = m.identifier
             WHERE m.frameworkprogramme IN ('${framework.trim()}');
         `;
         // Execute the query

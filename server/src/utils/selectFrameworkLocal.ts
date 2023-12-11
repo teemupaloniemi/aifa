@@ -1,7 +1,4 @@
-import axios from 'axios'; // We'll use axios to make HTTP requests
-import dotenv from 'dotenv';
-
-dotenv.config();
+import { generate } from './generate'
 
 interface Framework {
     id: string;
@@ -14,16 +11,10 @@ export async function selectFramework(researchIdea: string, frameworks: Framewor
 
     // Convert frameworks to condensed id-name pairs
     const condensedFrameworks = frameworks.map(f => `${f.id}:${f.name}`).join(',');
-    const ip = process.env.LLM_IP;
-    // Use axios to send a POST request to our LLM API endpoint
-    const response = await axios.post(`http://${ip}/query`, {
-        prompt: `For the following idea <idea>${researchIdea}</idea>, which European Commission funds (IDs) from <frameworks>${condensedFrameworks}</frameworks> are propably best suitable? Reply with tags like this <ids>suitable IDs here like 12345</ids>. Best fitting fund ids are: <ids> `
-    }, {
-        timeout: 300000 // 5 minutes timeout
-    });
+    let prompt = `For the following idea <idea>${researchIdea}</idea>, which European Commission funds (IDs) from <frameworks>${condensedFrameworks}</frameworks> are propably best suitable? Reply with tags like this <ids>suitable IDs here like 12345</ids>. Best fitting fund ids are: <ids> `
 
-    const result = response.data.response.replace(`For the following idea <idea>${researchIdea}</idea>, which European Commission funds (IDs) from <frameworks>${condensedFrameworks}</frameworks> are propably best suitable? Reply with tags like this <ids>suitable IDs here like 12345</ids>. Best fitting fund ids are:`, "");
-
+    let result = await generate(prompt);
+    result = "<ids>" + result
     console.log("\n\x1B[34m", result, "\x1B[0m\n");
 
     // Parse the response

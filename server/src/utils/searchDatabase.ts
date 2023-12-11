@@ -1,4 +1,3 @@
-import { all } from 'axios';
 import { Client } from 'pg';
 import dotenv from 'dotenv';
 
@@ -12,7 +11,7 @@ export async function searchFromDatabase(fitting_frameworks: string[] = ["431083
         host: 'localhost',
         port: 5432,
         user: 'aifadmin',
-        password: process.env.DB_PASSWORD,
+        password: 'binaryblaze',
         database: 'aifabase',
     });
 
@@ -26,7 +25,7 @@ export async function searchFromDatabase(fitting_frameworks: string[] = ["431083
         // Construct the SQL query to join detaileddata and metadata tables
         const query = `
             SELECT * FROM detaileddata d
-            JOIN metadata m ON d.metadata_id = m.id
+            JOIN metadata m ON d.metadata_id = m.identifier
             WHERE m.frameworkprogramme IN ('${framework.trim()}');
         `;
 

@@ -2,15 +2,13 @@ const { Client } = require('pg');
 const axios = require('axios');
 const FormData = require('form-data');
 const puppeteer = require('puppeteer');
-const { Browser } = require('puppeteer');
 const dotenv = require('dotenv');
 
 dotenv.config();
 
 const frameworks = [
   { id: "43108390", name: "Horizon Europe (HORIZON)", keywords: "Research, Innovation, Science, Technology" },
-  { id: "44181033", name: "European Defence Fund (EDF)", keywords: "Defense, Security, Military, Technology" },
-  { id: "111111", name: "EU External Action (RELEX)", keywords: "Foreign Policy, Diplomacy, International Relations" },
+  { id: "44181033", name: "European Defence Fund (EDF)", keywords: "Defense, Security, Military, Technology" }, 
   { id: "43152860", name: "Digital Europe Programme (DIGITAL)", keywords: "Digitalization, Technology, Internet, Cybersecurity" },
   { id: "43252405", name: "Programme for the Environment and Climate Action (LIFE)", keywords: "Environment, Climate Change, Sustainability" },
   { id: "43332642", name: "EU4Health Programme (EU4H)", keywords: "Healthcare, Public Health, Medical Research" },
@@ -98,7 +96,7 @@ const scrapeContent = async (url, browser) => {
         await page.goto(url);
 
         // Wait for the iframe to load
-        const iframeSelector = 'body > app-root > ng-component > eui-app > div > div > mywp-route-element-loader > mywp-element-loader > div > div > iframe';
+        const iframeSelector = 'body > app-root > ng-component > eui-app > div > div > mywp-route-element-loader > mywp-element-loader > div > iframe';
         await page.waitForSelector(iframeSelector, {timeout: 300000});
 
         // Get the iframe's content frame
@@ -203,7 +201,7 @@ const client = new Client({
     host: 'localhost',
     port: 5432,
     user: 'aifadmin',
-    password: process.env.DB_PASSWORD,
+    password: 'binaryblaze',
     database: 'aifabase',
 });
 
@@ -251,8 +249,9 @@ const saveData = async (dataList) => {
         RETURNING identifier;`;    
         const metadataValues = [identifier, caName, es_ContentType, keywords, programmePeriod, esDA_IngestDate, type, title, esST_URL, esDA_QueueDate, esST_FileName, callIdentifier, frameworkProgramme, startDate, deadlineDate];
         const metadataRes = await client.query(metadataQuery, metadataValues);
+        console.log(metadataRes)
         const metadataId = metadataRes.rows[0].identifier;
-
+     
         if (metadataRes.rowCount === 0) {
             console.log(`Conflict detected for identifier ${identifier}. No update needed.`);
         } else {
