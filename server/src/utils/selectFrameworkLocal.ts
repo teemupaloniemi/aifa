@@ -14,7 +14,7 @@ export async function selectFramework(researchIdea: string, frameworks: Framewor
     let prompt = `For the following idea <idea>${researchIdea}</idea>, which European Commission funds (IDs) from <frameworks>${condensedFrameworks}</frameworks> are propably best suitable? Reply with tags like this <ids>suitable IDs here like 12345</ids>. Best fitting fund ids are: <ids> `
 
     let result = await generate(prompt);
-    result = "<ids>" + result
+    result = result
     console.log("\n\x1B[34m", result, "\x1B[0m\n");
 
     // Parse the response

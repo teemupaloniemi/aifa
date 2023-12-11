@@ -2,9 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generate = void 0;
 function tokenize(transcription) {
-    const system = "system\nYou are an assistant called helping with EU funding opportunities. Help answer my questions. Give a short answer, please. Try to answer strictly to the question and with given xml tag like symbols.";
-    const user = "user\n" + transcription;
-    const assistant = "assistant\n";
+    const start = "<|im_start|>";
+    const end = "<|im_end|>";
+    const system = start + "system\nYou are an assistant called helping with EU funding opportunities. Help answer my questions. Give a short answer, please. Try to answer strictly to the question and with given xml tag like symbols." + end;
+    const user = start + "user\n" + transcription + end;
+    const assistant = start + "assistant\n";
     const prompt = system + user + assistant;
     return prompt;
 }
@@ -18,7 +20,7 @@ async function generate(prompt) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                prompt: prompt,
+                prompt: final_prompt,
                 n_predict: 256
             })
         });

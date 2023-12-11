@@ -8,7 +8,7 @@ async function selectFramework(researchIdea, frameworks) {
     const condensedFrameworks = frameworks.map(f => `${f.id}:${f.name}`).join(',');
     let prompt = `For the following idea <idea>${researchIdea}</idea>, which European Commission funds (IDs) from <frameworks>${condensedFrameworks}</frameworks> are propably best suitable? Reply with tags like this <ids>suitable IDs here like 12345</ids>. Best fitting fund ids are: <ids> `;
     let result = await (0, generate_1.generate)(prompt);
-    result = "<ids>" + result;
+    result = result;
     console.log("\n\x1B[34m", result, "\x1B[0m\n");
     // Parse the response
     const matches = [...result.matchAll(/<ids>(.*?)<\/ids>/g)];

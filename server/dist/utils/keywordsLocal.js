@@ -6,7 +6,7 @@ async function getKeywords(researchIdea) {
     console.log("\nGenerating keywords...");
     try {
         let result = await (0, generate_1.generate)(`Provide keywords that could be relevat for R&D: ${researchIdea} in tags like this <keywords>keywords go in here</keywords>. Keywords that fit your idea are: <keywords> `);
-        result = "<keywords>" + result;
+        result = result;
         console.log("\n\x1B[34m", result, "\x1B[0m\n");
         //console.log(response.data.response);
         const matches = [...result.matchAll(/<keywords>(.*?)<\/keywords>/g)];

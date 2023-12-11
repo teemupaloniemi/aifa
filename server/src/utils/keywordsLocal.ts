@@ -7,7 +7,7 @@ export async function getKeywords(researchIdea: string): Promise<string> {
   try {
     let result = await generate(`Provide keywords that could be relevat for R&D: ${researchIdea} in tags like this <keywords>keywords go in here</keywords>. Keywords that fit your idea are: <keywords> `);
 
-    result = "<keywords>"+result 
+    result = result 
     console.log("\n\x1B[34m", result, "\x1B[0m\n");
 
     //console.log(response.data.response);
