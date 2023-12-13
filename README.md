@@ -21,6 +21,34 @@ This repository houses the codebase and resources for a research project explori
 ### Database 
 
 - Set up a PostgreSQL database with tables named `detaileddata` and `metadata`.
+  ```
+  CREATE TABLE metadata (
+    id integer NOT NULL,
+    identifier text,
+    caname text,
+    es_contenttype text,
+    keywords text,
+    programmeperiod text,
+    esda_ingestdate text,
+    type text,
+    title text,
+    esst_url text,
+    esda_queuedate text,
+    esst_filename text,
+    callidentifier text,
+    frameworkprogramme text,
+    startdate text,
+    deadlinedate text);
+```  
+CREATE TABLE detaileddata (
+    id integer NOT NULL,
+    metadata_id character varying(255),
+    scrapedcontent text,
+    title text,
+    language text,
+    content text,
+    score integer);
+```
 - Fill database by running `node savedata.js` in the `./aifa/server/src` folder. (or by using the old dump file **not recommended!**) 
 
 ### Local LLM Server
