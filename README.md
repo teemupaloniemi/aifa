@@ -21,8 +21,8 @@ This repository houses the codebase and resources for a research project explori
 ### Database 
 
 - Set up a PostgreSQL database with tables named `detaileddata` and `metadata`.
-  ```
-  CREATE TABLE metadata (
+```
+CREATE TABLE metadata (
     id integer NOT NULL,
     identifier text,
     caname text,
@@ -39,7 +39,7 @@ This repository houses the codebase and resources for a research project explori
     frameworkprogramme text,
     startdate text,
     deadlinedate text);
-```  
+ 
 CREATE TABLE detaileddata (
     id integer NOT NULL,
     metadata_id character varying(255),
