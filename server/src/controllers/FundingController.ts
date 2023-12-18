@@ -2,7 +2,9 @@ import { Request, Response } from 'express';
 import { searchFromDatabase } from '../utils/searchDatabase';
 import { translateText } from '../utils/translate';
 import { getKeywords } from '../utils/keywordsLocal';
+import { getKeywordsOpenAI } from '../utils/keywords';
 import { selectFramework } from '../utils/selectFrameworkLocal';
+import { selectFrameworkOpenAI } from '../utils/selectFramework';
 import { analyse } from '../utils/analyse';
 import dotenv from 'dotenv';
 
@@ -56,6 +58,10 @@ class FundingController {
   static async searchTenders(req: Request, res: Response): Promise<void> {
     
     let researchIdea = req.body.researchIdea as string;
+    let model = req.body.model as string
+
+    console.log("\nModel selected: ", model, "\n")
+    
 
     try {
       console.log('searchTenders: Preparing query data');
@@ -63,12 +69,18 @@ class FundingController {
       // NOT USED NOW
       const translatedResearchIdea = researchIdea; //await translateText(researchIdea); 
       // LOCAL
-      const fittingFrameworks = await selectFramework(translatedResearchIdea, frameworks);
+      let fittingFrameworks: string[] = []
+      if (model == "Local") { fittingFrameworks = await selectFramework(translatedResearchIdea, frameworks); }
+      if (model == "GPT") { fittingFrameworks = await selectFrameworkOpenAI(translatedResearchIdea, frameworks); }
       // DB
       const allItems = await searchFromDatabase(fittingFrameworks);
       // LOCAL
-      const keywords = await getKeywords(translatedResearchIdea);
+      let keywords: string = ""
+      if (model == "Local") { keywords = await getKeywords(translatedResearchIdea); }
+      if (model == "GPT") { keywords = await getKeywordsOpenAI(translatedResearchIdea); }
+      console.log("Keywords out-of-the-box: ", keywords)
       // LOCAL
+      
       const analysed_results = await analyse(allItems, keywords);
       
       console.log("Ready, sending results back!");

@@ -2,20 +2,24 @@
  * Utility functions for assessment of items.
  */
 // Function to compare two descriptions
-export const compareResearchDescriptions = (researchIdea: string, researchInstrument: string): number => {
+export const compareResearchDescriptions = (keywords: string, researchInstrument: string): number => {
   // Convert both descriptions to lowercase and split them into arrays of words
+  console.log("Keywords: ", keywords)
   let ideaWords = ["No research idea"];
   let instrumentWords = ["No instrument"];
-  if (researchIdea) ideaWords = researchIdea.toLowerCase().replace(',', '').split(/\s+/);
+
+  if (keywords) ideaWords = keywords.toLowerCase().replace(',', '').split(/\s+/);
   else {
     console.log(ideaWords);
     return 0;
   }
+
   if (researchInstrument) instrumentWords = researchInstrument.toLowerCase().replace(',', '').split(/\s+/);
   else {
     console.log(instrumentWords);
     return 0;
   }
+
   // Remove duplicates from both arrays
   const uniqueIdeaWords = Array.from(new Set(ideaWords));
   const uniqueInstrumentWords = Array.from(new Set(instrumentWords));

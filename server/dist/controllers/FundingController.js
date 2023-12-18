@@ -6,7 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FundingController = void 0;
 const searchDatabase_1 = require("../utils/searchDatabase");
 const keywordsLocal_1 = require("../utils/keywordsLocal");
+const keywords_1 = require("../utils/keywords");
 const selectFrameworkLocal_1 = require("../utils/selectFrameworkLocal");
+const selectFramework_1 = require("../utils/selectFramework");
 const analyse_1 = require("../utils/analyse");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
@@ -50,16 +52,31 @@ const frameworks = [
 class FundingController {
     static async searchTenders(req, res) {
         let researchIdea = req.body.researchIdea;
+        let model = req.body.model;
+        console.log("\nModel selected: ", model, "\n");
         try {
             console.log('searchTenders: Preparing query data');
             // NOT USED NOW
             const translatedResearchIdea = researchIdea; //await translateText(researchIdea); 
             // LOCAL
-            const fittingFrameworks = await (0, selectFrameworkLocal_1.selectFramework)(translatedResearchIdea, frameworks);
+            let fittingFrameworks = [];
+            if (model == "Local") {
+                fittingFrameworks = await (0, selectFrameworkLocal_1.selectFramework)(translatedResearchIdea, frameworks);
+            }
+            if (model == "GPT") {
+                fittingFrameworks = await (0, selectFramework_1.selectFrameworkOpenAI)(translatedResearchIdea, frameworks);
+            }
             // DB
             const allItems = await (0, searchDatabase_1.searchFromDatabase)(fittingFrameworks);
             // LOCAL
-            const keywords = await (0, keywordsLocal_1.getKeywords)(translatedResearchIdea);
+            let keywords = "";
+            if (model == "Local") {
+                keywords = await (0, keywordsLocal_1.getKeywords)(translatedResearchIdea);
+            }
+            if (model == "GPT") {
+                keywords = await (0, keywords_1.getKeywordsOpenAI)(translatedResearchIdea);
+            }
+            console.log("Keywords out-of-the-box: ", keywords);
             // LOCAL
             const analysed_results = await (0, analyse_1.analyse)(allItems, keywords);
             console.log("Ready, sending results back!");

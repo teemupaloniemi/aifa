@@ -11,10 +11,10 @@ export async function selectFramework(researchIdea: string, frameworks: Framewor
 
     // Convert frameworks to condensed id-name pairs
     const condensedFrameworks = frameworks.map(f => `${f.id}:${f.name}`).join(',');
-    let prompt = `For the following idea <idea>${researchIdea}</idea>, which European Commission funds (IDs) from <frameworks>${condensedFrameworks}</frameworks> are propably best suitable? Reply with tags like this <ids>suitable IDs here like 12345</ids>. Best fitting fund ids are: <ids> `
+    let prompt = `For the following idea \n<idea>${researchIdea}</idea>\n, which European Commission funds (IDs) from <frameworks>${condensedFrameworks}</frameworks> are propably best suitable? Reply with tags like this <ids>suitable IDs here like 12345</ids>. Best fitting fund ids are: <ids> `
 
     let result = await generate(prompt);
-    result = result
+    result = "<ids>" + result.replace("<ids>", "") // make sure the start tag is there
     console.log("\n\x1B[34m", result, "\x1B[0m\n");
 
     // Parse the response

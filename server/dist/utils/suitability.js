@@ -5,12 +5,13 @@ exports.compareResearchDescriptions = void 0;
  * Utility functions for assessment of items.
  */
 // Function to compare two descriptions
-const compareResearchDescriptions = (researchIdea, researchInstrument) => {
+const compareResearchDescriptions = (keywords, researchInstrument) => {
     // Convert both descriptions to lowercase and split them into arrays of words
+    console.log("Keywords: ", keywords);
     let ideaWords = ["No research idea"];
     let instrumentWords = ["No instrument"];
-    if (researchIdea)
-        ideaWords = researchIdea.toLowerCase().replace(',', '').split(/\s+/);
+    if (keywords)
+        ideaWords = keywords.toLowerCase().replace(',', '').split(/\s+/);
     else {
         console.log(ideaWords);
         return 0;

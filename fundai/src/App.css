@@ -1,3 +1,13 @@
 .App { 
   margin: 1em;
 }
+
+.app-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two equal columns */
+  gap: 16px; /* Adjust the gap between columns as needed */
+}
+
+.column {
+  grid-column: span 1; /* Each column spans one grid cell */
+}

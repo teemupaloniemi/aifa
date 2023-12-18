@@ -3,14 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.selectFramework = void 0;
+exports.selectFrameworkOpenAI = void 0;
 const openai_1 = require("openai");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const openai = new openai_1.OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
-async function selectFramework(researchIdea, frameworks) {
+async function selectFrameworkOpenAI(researchIdea, frameworks) {
     var _a;
     console.log("\nSelecting frameworks...");
     const chatCompletion_framework = await openai.chat.completions.create({
@@ -28,4 +28,4 @@ async function selectFramework(researchIdea, frameworks) {
     }
     return selectedIds;
 }
-exports.selectFramework = selectFramework;
+exports.selectFrameworkOpenAI = selectFrameworkOpenAI;

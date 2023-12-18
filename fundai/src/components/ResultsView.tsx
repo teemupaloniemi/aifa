@@ -84,9 +84,13 @@ const frameworks: Framework[] = [
 
 const App: React.FC<AppProps> = ({ inputString }) => {
   const [tenderData, setTenderData] = useState<DetailedData[]>([]);
+  const [tenderDataOpenAI, setTenderDataOpenAI] = useState<DetailedData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoadingOpenAI, setIsLoadingOpenAI] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<DetailedData | null>(null);
   const [inputValue, setInputValue] = useState<string>(inputString);
+  const [fetchLocalData, setFetchLocalData] = useState(true);
+  const [fetchOpenAIData, setFetchOpenAIData] = useState(true);
 
 
   const handleItemClick = (item: DetailedData) => {
@@ -117,14 +121,26 @@ const App: React.FC<AppProps> = ({ inputString }) => {
     }, {} as Record<string, DetailedData[]>);
   };
 
-
-
   const fetchTenders = async () => {
+    if (inputValue.length == 0) { 
+      alert("No input")
+      return
+    }
+    if (fetchLocalData) {
+      await fetchTendersLocal();
+    }
+
+    if (fetchOpenAIData) {
+      await fetchTendersOpenAI();
+    }
+  }
+
+  const fetchTendersLocal = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`http://localhost:5001/api/fundingTenders/searchTenders`, { researchIdea: inputValue });
+      const response = await axios.post(`http://localhost:5001/api/fundingTenders/searchTenders`, { researchIdea: inputValue, model: "Local" });
       setTenderData(response.data.results);
-      if (response.data.results.length === 0) alert("No Results Found :(")
+      if (response.data.results.length === 0) alert("No Results Found (Local) :(")
     } catch (error) {
       console.error('Error fetching tenders:', error);
     }
@@ -132,25 +148,68 @@ const App: React.FC<AppProps> = ({ inputString }) => {
   };
 
 
-  const groupedTenders = groupByFramework(tenderData);
+  const fetchTendersOpenAI = async () => {
+    setIsLoadingOpenAI(true);
+    try {
+      const response = await axios.post(`http://localhost:5001/api/fundingTenders/searchTenders`, { researchIdea: inputValue, model: "GPT" });
+      setTenderDataOpenAI(response.data.results);
+      if (response.data.results.length === 0) alert("No Results Found (GPT) :(")
+    } catch (error) {
+      console.error('Error fetching tenders:', error);
+    }
+    setIsLoadingOpenAI(false);
+  };
 
+
+  const groupedTenders = groupByFramework(tenderData);
+  const groupedTendersOpenAI = groupByFramework(tenderDataOpenAI);
 
   return (
-    <div>
+    <>
       <Header />
       <ResearchIdeaInput inputValue={inputValue} onInputChange={setInputValue} onSearch={fetchTenders} />
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <>
-          {selectedItem ? (
-            <DetailedView selectedItem={selectedItem} onClose={handleCloseClick} />
-          ) : (
-            <FrameworkList groupedTenders={groupedTenders} frameworks={frameworks} onItemSelect={handleItemClick} />
-          )}
-        </>
-      )}
-    </div>
+      <div className="app-container">
+      {/* Local Tenders Column */}
+      <div className="column">
+        <div>Local LLM</div>
+        <label>
+          Fetch With Local LLM
+          <input type="checkbox" checked={fetchLocalData} onChange={() => setFetchLocalData(!fetchLocalData)} />
+        </label>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            {selectedItem ? (
+              <DetailedView selectedItem={selectedItem} onClose={handleCloseClick} />
+            ) : (
+              <FrameworkList groupedTenders={groupedTenders} frameworks={frameworks} onItemSelect={handleItemClick} />
+            )}
+          </>
+        )}
+      </div>
+
+      {/* OpenAI Tenders Column */}
+      <div className="column">
+      <div>OpenAI</div>
+      <label>
+          Fetch With OpenAI
+          <input type="checkbox" checked={fetchOpenAIData} onChange={() => setFetchOpenAIData(!fetchOpenAIData)} />
+        </label>
+        {isLoadingOpenAI ? (
+          <Loading />
+        ) : (
+          <>
+            {selectedItem ? (
+              <DetailedView selectedItem={selectedItem} onClose={handleCloseClick} />
+            ) : (
+              <FrameworkList groupedTenders={groupedTendersOpenAI} frameworks={frameworks} onItemSelect={handleItemClick} />
+            )}
+          </>
+        )}
+      </div>
+      </div>
+    </>
   );
 };
 
