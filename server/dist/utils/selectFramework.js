@@ -13,8 +13,9 @@ const openai = new openai_1.OpenAI({
 async function selectFrameworkOpenAI(researchIdea, frameworks) {
     var _a;
     console.log("\nSelecting frameworks...");
+    const condensedFrameworks = frameworks.map(f => `${f.id}:${f.name}: keywords${f.keywords}`).join(',\n');
     const chatCompletion_framework = await openai.chat.completions.create({
-        messages: [{ role: "user", content: `I want to compare European Commission funding opportunities. Tell me which ones of the following framework ids are a good fit for this idea\n${researchIdea}\n\nHere are the possible funds\n\n${JSON.stringify(frameworks)}. You can give multiple ids if appropriate but give the ids in comma separated list inside the xml. \n\nGive the best fitting fund IDs in xml tags <ids>the ids go here in comma separated form</ids>` }],
+        messages: [{ role: "user", content: `I want to compare European Commission funding opportunities. Tell me which ones of the following framework ids are a good fit for this idea\n${researchIdea}\n\nHere are the possible funds\n\n${condensedFrameworks}. You can give multiple ids if appropriate but give the ids in comma separated list inside the xml. \n\nGive the best fitting fund IDs in xml tags <ids>the ids go here in comma separated form</ids>` }],
         model: "gpt-3.5-turbo",
     });
     const match = (_a = chatCompletion_framework.choices[0].message.content) === null || _a === void 0 ? void 0 : _a.match(/<ids>([\d,\s]+)<\/ids>/);

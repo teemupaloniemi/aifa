@@ -91,6 +91,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
   const [inputValue, setInputValue] = useState<string>(inputString);
   const [fetchLocalData, setFetchLocalData] = useState(true);
   const [fetchOpenAIData, setFetchOpenAIData] = useState(true);
+  const [bigModel, setBigModel] = useState(false);
 
 
   const handleItemClick = (item: DetailedData) => {
@@ -138,7 +139,8 @@ const App: React.FC<AppProps> = ({ inputString }) => {
   const fetchTendersLocal = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`http://localhost:5001/api/fundingTenders/searchTenders`, { researchIdea: inputValue, model: "Local" });
+      let domain: string = "http://localhost:5001/api/fundingTenders/searchTenders"
+      const response = await axios.post(`${domain}`, { researchIdea: inputValue, model: "Local", useFalcon: bigModel});
       setTenderData(response.data.results);
       if (response.data.results.length === 0) alert("No Results Found (Local) :(")
     } catch (error) {
@@ -151,7 +153,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
   const fetchTendersOpenAI = async () => {
     setIsLoadingOpenAI(true);
     try {
-      const response = await axios.post(`http://localhost:5001/api/fundingTenders/searchTenders`, { researchIdea: inputValue, model: "GPT" });
+      const response = await axios.post(`http://localhost:5001/api/fundingTenders/searchTenders`, { researchIdea: inputValue, model: "GPT", useFalcon: false });
       setTenderDataOpenAI(response.data.results);
       if (response.data.results.length === 0) alert("No Results Found (GPT) :(")
     } catch (error) {
@@ -175,6 +177,11 @@ const App: React.FC<AppProps> = ({ inputString }) => {
         <label>
           Fetch With Local LLM
           <input type="checkbox" checked={fetchLocalData} onChange={() => setFetchLocalData(!fetchLocalData)} />
+          
+        </label>
+        <label>
+          Use Falcon?
+          <input type="checkbox" checked={bigModel} onChange={() => setBigModel(!bigModel)} />
         </label>
         {isLoading ? (
           <Loading />
@@ -196,6 +203,7 @@ const App: React.FC<AppProps> = ({ inputString }) => {
           Fetch With OpenAI
           <input type="checkbox" checked={fetchOpenAIData} onChange={() => setFetchOpenAIData(!fetchOpenAIData)} />
         </label>
+        
         {isLoadingOpenAI ? (
           <Loading />
         ) : (

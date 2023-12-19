@@ -59,10 +59,16 @@ class FundingController {
     
     let researchIdea = req.body.researchIdea as string;
     let model = req.body.model as string
+    let useFalcon = req.body.useFalcon as boolean
+    if (model == "GPT") { 
+      console.log("\x1B[32m=============== Model GPT ===================\x1B[0m")
+    } else { 
+      console.log("\x1B[33m=============== Model Local ===================\x1B[0m")
+    }
 
-    console.log("\nModel selected: ", model, "\n")
+    console.log("\nModel selected: ", model)
+    console.log("Using Falcon: ", useFalcon, "\n")
     
-
     try {
       console.log('searchTenders: Preparing query data');
 
@@ -70,20 +76,25 @@ class FundingController {
       const translatedResearchIdea = researchIdea; //await translateText(researchIdea); 
       // LOCAL
       let fittingFrameworks: string[] = []
-      if (model == "Local") { fittingFrameworks = await selectFramework(translatedResearchIdea, frameworks); }
+      if (model == "Local") { fittingFrameworks = await selectFramework(translatedResearchIdea, frameworks, useFalcon); }
       if (model == "GPT") { fittingFrameworks = await selectFrameworkOpenAI(translatedResearchIdea, frameworks); }
       // DB
       const allItems = await searchFromDatabase(fittingFrameworks);
       // LOCAL
       let keywords: string = ""
-      if (model == "Local") { keywords = await getKeywords(translatedResearchIdea); }
+      if (model == "Local") { keywords = await getKeywords(translatedResearchIdea, useFalcon); }
       if (model == "GPT") { keywords = await getKeywordsOpenAI(translatedResearchIdea); }
-      console.log("Keywords out-of-the-box: ", keywords)
       // LOCAL
       
       const analysed_results = await analyse(allItems, keywords);
       
       console.log("Ready, sending results back!");
+      if (model == "GPT") { 
+        console.log("\x1B[32m=============== End GPT ===================\x1B[0m")
+      } else { 
+        console.log("\x1B[33m=============== End Local ===================\x1B[0m")
+      }
+
       res.json({ results: analysed_results });
 
     } catch (error) {

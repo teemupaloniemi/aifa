@@ -1,14 +1,14 @@
 import { generate } from './generate'
 
 
-export async function getKeywords(researchIdea: string): Promise<string> {
+export async function getKeywords(researchIdea: string, useFalcon: boolean): Promise<string> {
   console.log("\nGenerating keywords...")
 
   try {
-    let result = await generate(`Provide keywords that could be relevat for R&D: ${researchIdea} in tags like this <keywords>keywords go in here</keywords>. Keywords that fit your idea are: <keywords> `);
+    let result = await generate(`Provide simple one-word thematically correct keywords that could be relevat for R&D: ${researchIdea} in tags like this <keywords>onekeyword, twokeyword, threekeyword</keywords>.`, useFalcon);
 
     result = result 
-    console.log("\n\x1B[34m", result, "\x1B[0m\n");
+    console.log("\n\x1B[34mGenerated text: ", result, "\x1B[0m\n");
 
     //console.log(response.data.response);
     const matches = [...result.matchAll(/<keywords>(.*?)<\/keywords>/g)];

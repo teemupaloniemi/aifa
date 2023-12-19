@@ -2,12 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.selectFramework = void 0;
 const generate_1 = require("./generate");
-async function selectFramework(researchIdea, frameworks) {
+async function selectFramework(researchIdea, frameworks, useFalcon) {
     console.log("\nSelecting frameworks...");
     // Convert frameworks to condensed id-name pairs
-    const condensedFrameworks = frameworks.map(f => `${f.id}:${f.name}`).join(',');
+    const condensedFrameworks = frameworks.map(f => `${f.id}:${f.name}: keywords${f.keywords}`).join(',\n');
     let prompt = `For the following idea \n<idea>${researchIdea}</idea>\n, which European Commission funds (IDs) from <frameworks>${condensedFrameworks}</frameworks> are propably best suitable? Reply with tags like this <ids>suitable IDs here like 12345</ids>. Best fitting fund ids are: <ids> `;
-    let result = await (0, generate_1.generate)(prompt);
+    let result = await (0, generate_1.generate)(prompt, useFalcon);
     result = "<ids>" + result.replace("<ids>", ""); // make sure the start tag is there
     console.log("\n\x1B[34m", result, "\x1B[0m\n");
     // Parse the response

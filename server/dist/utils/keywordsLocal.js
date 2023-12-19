@@ -2,12 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getKeywords = void 0;
 const generate_1 = require("./generate");
-async function getKeywords(researchIdea) {
+async function getKeywords(researchIdea, useFalcon) {
     console.log("\nGenerating keywords...");
     try {
-        let result = await (0, generate_1.generate)(`Provide keywords that could be relevat for R&D: ${researchIdea} in tags like this <keywords>keywords go in here</keywords>. Keywords that fit your idea are: <keywords> `);
+        let result = await (0, generate_1.generate)(`Provide simple one-word thematically correct keywords that could be relevat for R&D: ${researchIdea} in tags like this <keywords>onekeyword, twokeyword, threekeyword</keywords>.`, useFalcon);
         result = result;
-        console.log("\n\x1B[34m", result, "\x1B[0m\n");
+        console.log("\n\x1B[34mGenerated text: ", result, "\x1B[0m\n");
         //console.log(response.data.response);
         const matches = [...result.matchAll(/<keywords>(.*?)<\/keywords>/g)];
         const keywordMatch = matches.map(match => match[1]).join(', ');

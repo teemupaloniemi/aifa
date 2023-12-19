@@ -53,7 +53,15 @@ class FundingController {
     static async searchTenders(req, res) {
         let researchIdea = req.body.researchIdea;
         let model = req.body.model;
-        console.log("\nModel selected: ", model, "\n");
+        let useFalcon = req.body.useFalcon;
+        if (model == "GPT") {
+            console.log("\x1B[32m=============== Model GPT ===================\x1B[0m");
+        }
+        else {
+            console.log("\x1B[33m=============== Model Local ===================\x1B[0m");
+        }
+        console.log("\nModel selected: ", model);
+        console.log("Using Falcon: ", useFalcon, "\n");
         try {
             console.log('searchTenders: Preparing query data');
             // NOT USED NOW
@@ -61,7 +69,7 @@ class FundingController {
             // LOCAL
             let fittingFrameworks = [];
             if (model == "Local") {
-                fittingFrameworks = await (0, selectFrameworkLocal_1.selectFramework)(translatedResearchIdea, frameworks);
+                fittingFrameworks = await (0, selectFrameworkLocal_1.selectFramework)(translatedResearchIdea, frameworks, useFalcon);
             }
             if (model == "GPT") {
                 fittingFrameworks = await (0, selectFramework_1.selectFrameworkOpenAI)(translatedResearchIdea, frameworks);
@@ -71,15 +79,20 @@ class FundingController {
             // LOCAL
             let keywords = "";
             if (model == "Local") {
-                keywords = await (0, keywordsLocal_1.getKeywords)(translatedResearchIdea);
+                keywords = await (0, keywordsLocal_1.getKeywords)(translatedResearchIdea, useFalcon);
             }
             if (model == "GPT") {
                 keywords = await (0, keywords_1.getKeywordsOpenAI)(translatedResearchIdea);
             }
-            console.log("Keywords out-of-the-box: ", keywords);
             // LOCAL
             const analysed_results = await (0, analyse_1.analyse)(allItems, keywords);
             console.log("Ready, sending results back!");
+            if (model == "GPT") {
+                console.log("\x1B[32m=============== End GPT ===================\x1B[0m");
+            }
+            else {
+                console.log("\x1B[33m=============== End Local ===================\x1B[0m");
+            }
             res.json({ results: analysed_results });
         }
         catch (error) {

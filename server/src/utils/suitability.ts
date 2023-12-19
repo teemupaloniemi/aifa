@@ -4,7 +4,6 @@
 // Function to compare two descriptions
 export const compareResearchDescriptions = (keywords: string, researchInstrument: string): number => {
   // Convert both descriptions to lowercase and split them into arrays of words
-  console.log("Keywords: ", keywords)
   let ideaWords = ["No research idea"];
   let instrumentWords = ["No instrument"];
 
@@ -19,7 +18,12 @@ export const compareResearchDescriptions = (keywords: string, researchInstrument
     console.log(instrumentWords);
     return 0;
   }
-
+  for (let i = 0; i < ideaWords.length; i++) { 
+    ideaWords[i] = ideaWords[i].replace(",", "").trim()
+  }
+  for (let i = 0; i < instrumentWords.length; i++) { 
+    instrumentWords[i] = instrumentWords[i].replace(",", "").trim()
+  }
   // Remove duplicates from both arrays
   const uniqueIdeaWords = Array.from(new Set(ideaWords));
   const uniqueInstrumentWords = Array.from(new Set(instrumentWords));
@@ -27,6 +31,7 @@ export const compareResearchDescriptions = (keywords: string, researchInstrument
   // Count the number of matching words
   let matchingWordsCount = 0;
   for (const word of uniqueIdeaWords) {
+    //console.log("matching: ", "-"+word+"-")
     if (uniqueInstrumentWords.includes(word)) {
       matchingWordsCount++;
     }
